@@ -76,9 +76,24 @@
             background: var(--card-bg); border-radius: var(--radius); overflow: hidden;
             box-shadow: var(--shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex; flex-direction: column; border: 1px solid var(--border-color);
+            position: relative;
         }
         .product-card:hover { border-color: rgba(229, 9, 20, 0.4); }
-        .product-img { width: 100%; height: 170px; object-fit: cover; background-color: #000; }
+        
+        .img-container { position: relative; width: 100%; height: 170px; background-color: #000; overflow: hidden; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        .product-card.out-of-stock .product-img { filter: grayscale(80%) opacity(0.6); }
+
+        /* ملصق الحالة على الصورة */
+        .status-badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 800; z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        .status-badge.available { background-color: #25d366; color: #000; }
+        .status-badge.unavailable { background-color: #e50914; color: #fff; }
+
         .product-details { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
         .product-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
         .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
@@ -105,6 +120,7 @@
             transition: background 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .add-to-cart-btn:active { background: var(--primary-hover); }
+        .add-to-cart-btn.disabled { background: #444; color: #888; cursor: not-allowed; }
 
         .cart-float-btn {
             position: fixed; bottom: 15px; left: 15px; background: var(--primary-color); color: white;
@@ -220,7 +236,6 @@
             <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: #fff;">تفاصيل الزبون والطلب</h3>
             <form id="checkout-form" onsubmit="handleSendWhatsApp(event)">
                 <div class="form-grid">
-                    <!-- حقل الملاحظات والطلبات الخاصة بـ مربع نص طويل -->
                     <div class="form-group full-width">
                         <label for="cust-notes">ملاحظات أو طلبات خاصة (مثل: بدون مخلل، بدون ثوم...):</label>
                         <textarea id="cust-notes" class="form-textarea" placeholder="اكتب هنا أي تعديلات ترغب بها على الطلب..."></textarea>
@@ -333,8 +348,6 @@
 
             rawRows.forEach((row, idx) => {
                 const name = getValue(row, 'item_name');
-                
-                // تجاهل الأسطر الفارغة التي لا تحتوي على اسم مادة
                 if (!name || name.trim() === '') return;
 
                 const id = getValue(row, 'item_id') || `item_${idx}`;
@@ -343,16 +356,18 @@
                 const rawPrice = getValue(row, 'price');
                 const price = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
                 const desc = getValue(row, 'description') || '';
-                const status = getValue(row, 'status') || 'متوفر';
+                const rawStatus = getValue(row, 'status') || 'متوفر';
                 const image = getValue(row, 'image_url') || '/logo.png';
 
-                if (status.includes('غير') || status.includes('نفذت')) return;
+                // فحص حالة التوفر صراحة
+                const isAvailable = !rawStatus.includes('غير') && !rawStatus.includes('نفذ') && !rawStatus.includes('لا');
 
                 const groupKey = `${category}_${name}`.trim();
 
                 if (!productsMap[groupKey]) {
                     productsMap[groupKey] = {
-                        id: id, category: category, name: name, desc: desc, image: image, variants: []
+                        id: id, category: category, name: name, desc: desc, image: image,
+                        isAvailable: isAvailable, variants: []
                     };
                 }
 
@@ -399,14 +414,31 @@
                 if (!productQuantities[prod.id]) productQuantities[prod.id] = 1;
 
                 const card = document.createElement('div');
-                card.className = 'product-card';
+                card.className = `product-card ${!prod.isAvailable ? 'out-of-stock' : ''}`;
                 
                 const optionsHtml = prod.variants.map((v, idx) => 
                     `<option value="${idx}">${v.size} - ${v.price.toLocaleString()} ل.س</option>`
                 ).join('');
 
+                // شارة حالة التوفر
+                const statusBadgeHtml = prod.isAvailable 
+                    ? `<span class="status-badge available">متوفر</span>`
+                    : `<span class="status-badge unavailable">غير متوفر</span>`;
+
+                // زر الإضافة للحالة
+                const buttonHtml = prod.isAvailable
+                    ? `<button class="add-to-cart-btn" onclick="addToCart('${prod.id}')">
+                        <i class="fa-solid fa-cart-plus"></i> إضافة إلى الطلب
+                       </button>`
+                    : `<button class="add-to-cart-btn disabled" disabled>
+                        <i class="fa-solid fa-ban"></i> غير متوفر حالياً
+                       </button>`;
+
                 card.innerHTML = `
-                    <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='/logo.png'">
+                    <div class="img-container">
+                        ${statusBadgeHtml}
+                        <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='/logo.png'">
+                    </div>
                     <div class="product-details">
                         <h3 class="product-title">${prod.name}</h3>
                         <p class="product-desc">${prod.desc}</p>
@@ -414,7 +446,7 @@
                         <div class="product-controls">
                             <div class="control-group">
                                 <span class="control-label">الحجم / الصنف:</span>
-                                <select class="form-select" id="size-${prod.id}" onchange="updatePriceDisplay('${prod.id}')">
+                                <select class="form-select" id="size-${prod.id}" onchange="updatePriceDisplay('${prod.id}')" ${!prod.isAvailable ? 'disabled' : ''}>
                                     ${optionsHtml}
                                 </select>
                             </div>
@@ -422,9 +454,9 @@
                             <div class="control-group">
                                 <span class="control-label">الكمية:</span>
                                 <div class="qty-picker">
-                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', -1)">-</button>
+                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', -1)" ${!prod.isAvailable ? 'disabled' : ''}>-</button>
                                     <span class="qty-val" id="qty-${prod.id}">${productQuantities[prod.id]}</span>
-                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', 1)">+</button>
+                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', 1)" ${!prod.isAvailable ? 'disabled' : ''}>+</button>
                                 </div>
                             </div>
 
@@ -432,9 +464,7 @@
                                 ${prod.variants[0].price.toLocaleString()} ل.س
                             </div>
 
-                            <button class="add-to-cart-btn" onclick="addToCart('${prod.id}')">
-                                <i class="fa-solid fa-cart-plus"></i> إضافة إلى الطلب
-                            </button>
+                            ${buttonHtml}
                         </div>
                     </div>
                 `;
@@ -464,7 +494,8 @@
 
         function addToCart(productId) {
             const prod = productsData.find(p => p.id === productId);
-            if (!prod) return;
+            if (!prod || !prod.isAvailable) return;
+            
             const selectEl = document.getElementById(`size-${productId}`);
             const selectedVariant = prod.variants[selectEl.value];
             const qtyToAdd = productQuantities[productId] || 1;
@@ -575,12 +606,10 @@
             orderData.subtotal = subtotal;
             orderData.total = subtotal;
 
-            // حفظ الطلب للكاشير محلياً
             let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
             existingOrders.unshift(orderData);
             localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
 
-            // نص التوصيل
             let deliveryNoteText = '';
             if (orderType === 'توصيل داخل داعل') {
                 deliveryNoteText = `🛵 *رسوم التوصيل:* مجاني (داخل داعل)\n`;
@@ -588,7 +617,6 @@
                 deliveryNoteText = `🛵 *رسوم التوصيل:* تحدد حسب المسافة (خارج داعل)\n`;
             }
 
-            // نص الملاحظات
             let notesText = notes ? `📌 *ملاحظات الطلب:* ${notes}\n` : '';
 
             const message = 
