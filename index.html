@@ -84,7 +84,6 @@
         .product-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease; }
         .product-card.out-of-stock .product-img { filter: grayscale(80%) opacity(0.5); }
 
-        /* ملصق الحالة الديناميكي */
         .status-badge {
             position: absolute; top: 10px; right: 10px;
             padding: 4px 10px; border-radius: 20px;
@@ -155,6 +154,23 @@
             border-radius: 10px; font-size: 1.05rem; font-weight: 800; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
+
+        /* النافذة المنبثقة للتأكيد الإرسال للواتساب */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 15px;
+        }
+        .modal-card {
+            background: #1a1a1a; border: 2px solid #25d366; border-radius: 16px;
+            padding: 25px 20px; text-align: center; max-width: 420px; width: 100%;
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.3);
+        }
+        .modal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
+        .modal-desc { font-size: 0.9rem; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; flex-direction: column; }
+        .modal-btn-confirm { background: #25d366; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+        .modal-btn-cancel { background: transparent; color: #e50914; border: 1px solid #e50914; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
 
         #pwa-install-banner {
             position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 500px; margin: 0 auto;
@@ -272,6 +288,24 @@
         </section>
     </main>
 
+    <!-- نافذة تأكيد الإرسال بالواتساب -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-card">
+            <div class="modal-title">💬 هل أتممت إرسال الرسالة عبر الواتساب؟</div>
+            <p class="modal-desc">
+                تم تحويلك إلى تطبيق الواتساب. يُرجى تأكيد إرسال الرسالة للمطعم ليتم اعتماد طلبك بداخل النظام وتسجيله للكاشير.
+            </p>
+            <div class="modal-actions">
+                <button class="modal-btn-confirm" onclick="confirmOrderSuccess()">
+                    <i class="fa-solid fa-check-circle"></i> نعم، قمت بإرسال الرسالة
+                </button>
+                <button class="modal-btn-cancel" onclick="cancelPendingOrder()">
+                    <i class="fa-solid fa-times-circle"></i> إلغاء الطلب (لم أرسل)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <button class="cart-float-btn" onclick="scrollToCart()">
         <i class="fa-solid fa-cart-shopping"></i>
         <span>الفاتورة</span>
@@ -303,6 +337,7 @@
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
+        let pendingOrderData = null; // طلب مؤقت ينتظر تأكيد الزبون
         const WHATSAPP_PHONE = '963951928490';
 
         document.addEventListener('DOMContentLoaded', () => { fetchLiveMenu(); });
@@ -360,7 +395,6 @@
                 const rawStatus = getValue(row, 'status') || 'متوفر';
                 const image = getValue(row, 'image_url') || '/logo.png';
 
-                // فحص حالة التوفر لهذا النوع المحدد
                 const isAvailable = !rawStatus.includes('غير') && !rawStatus.includes('نفذ') && !rawStatus.includes('لا');
 
                 const groupKey = `${category}_${name}`.trim();
@@ -372,7 +406,6 @@
                     };
                 }
 
-                // حفظ حالة التوفر لكل حجم/نوع بشكل مستقل
                 productsMap[groupKey].variants.push({ size: variant || 'عادي', price: price, isAvailable: isAvailable });
             });
 
@@ -458,11 +491,10 @@
                     </div>
                 `;
                 grid.appendChild(card);
-                updateVariantState(prod.id); // تحديث الواجهة فوراً للنوع المختار
+                updateVariantState(prod.id);
             });
         }
 
-        // دالة التحديث الديناميكي للمادة حسب النوع المختار
         function updateVariantState(productId) {
             const prod = productsData.find(p => p.id === productId);
             if (!prod) return;
@@ -477,11 +509,9 @@
             const btnMinus = document.getElementById(`btn-minus-${productId}`);
             const btnPlus = document.getElementById(`btn-plus-${productId}`);
 
-            // تحديث السعر
             document.getElementById(`price-${productId}`).innerText = `${(selectedVariant.price * qty).toLocaleString()} ل.س`;
 
             if (selectedVariant.isAvailable) {
-                // حالة متوفر للنوع المختار
                 cardEl.classList.remove('out-of-stock');
                 badgeEl.innerHTML = `<span class="status-badge available">متوفر</span>`;
                 btnContainer.innerHTML = `
@@ -491,7 +521,6 @@
                 btnMinus.removeAttribute('disabled');
                 btnPlus.removeAttribute('disabled');
             } else {
-                // حالة غير متوفر للنوع المختار
                 cardEl.classList.add('out-of-stock');
                 badgeEl.innerHTML = `<span class="status-badge unavailable">غير متوفر</span>`;
                 btnContainer.innerHTML = `
@@ -600,6 +629,7 @@
         function removeCartItem(index) { cart.splice(index, 1); renderCart(); }
         function scrollToCart() { document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' }); }
 
+        // بدء عملية الإرسال بالواتساب بوضع الطلب قيد الانتظار المؤقت
         function handleSendWhatsApp(event) {
             event.preventDefault();
             if (cart.length === 0) { alert('سلة الطلبات فارغة!'); return; }
@@ -612,7 +642,7 @@
 
             let subtotal = 0; let itemsListText = '';
 
-            const orderData = {
+            pendingOrderData = {
                 id: 'ORD-' + Date.now().toString().slice(-6),
                 date: new Date().toLocaleString('ar-SY'),
                 customer: { name, phone, address, notes, orderType },
@@ -625,12 +655,8 @@
                 itemsListText += `${idx + 1}. *${item.name}* (${item.size})\n   العدد: ${item.qty} | السعر: ${itemSubtotal.toLocaleString()} ل.س\n`;
             });
 
-            orderData.subtotal = subtotal;
-            orderData.total = subtotal;
-
-            let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
-            existingOrders.unshift(orderData);
-            localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
+            pendingOrderData.subtotal = subtotal;
+            pendingOrderData.total = subtotal;
 
             let deliveryNoteText = '';
             if (orderType === 'توصيل داخل داعل') {
@@ -644,7 +670,7 @@
             const message = 
 `🍹 *طلب جديد - عالم الفواكه* 🍹
 ---------------------------------
-🔢 *رقم الطلب:* ${orderData.id}
+🔢 *رقم الطلب:* ${pendingOrderData.id}
 👤 *اسم الزبون:* ${name}
 📞 *رقم الهاتف:* ${phone}
 📍 *العنوان:* ${address}
@@ -657,7 +683,33 @@ ${deliveryNoteText}💰 *الإجمالي النهائي:* *${subtotal.toLocaleS
 ---------------------------------
 شكراً لاختياركم عالم الفواكه!`;
 
+            // فتح الواتساب في نافذة جديدة
             window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
+
+            // إظهار النافذة المنبثقة للتأكيد في المتصفح
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        // عند تأكيد الزبون بأنه أرسل الرسالة فعلياً
+        function confirmOrderSuccess() {
+            if (pendingOrderData) {
+                let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
+                existingOrders.unshift(pendingOrderData);
+                localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
+
+                alert('تم اعتماد طلبك وإرساله للكاشير بنجاح! شكراً لك.');
+                pendingOrderData = null;
+                cart = [];
+                renderCart();
+                document.getElementById('checkout-form').reset();
+            }
+            document.getElementById('confirm-modal').style.display = 'none';
+        }
+
+        // عند اختيار الزبون الإلغاء وعدم الإرسال
+        function cancelPendingOrder() {
+            pendingOrderData = null;
+            document.getElementById('confirm-modal').style.display = 'none';
         }
 
         let deferredPrompt;
