@@ -81,15 +81,16 @@
         .product-card:hover { border-color: rgba(229, 9, 20, 0.4); }
         
         .img-container { position: relative; width: 100%; height: 170px; background-color: #000; overflow: hidden; }
-        .product-img { width: 100%; height: 100%; object-fit: cover; }
-        .product-card.out-of-stock .product-img { filter: grayscale(80%) opacity(0.6); }
+        .product-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease; }
+        .product-card.out-of-stock .product-img { filter: grayscale(80%) opacity(0.5); }
 
-        /* ملصق الحالة على الصورة */
+        /* ملصق الحالة الديناميكي */
         .status-badge {
             position: absolute; top: 10px; right: 10px;
             padding: 4px 10px; border-radius: 20px;
             font-size: 0.75rem; font-weight: 800; z-index: 2;
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
         }
         .status-badge.available { background-color: #25d366; color: #000; }
         .status-badge.unavailable { background-color: #e50914; color: #fff; }
@@ -120,7 +121,7 @@
             transition: background 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .add-to-cart-btn:active { background: var(--primary-hover); }
-        .add-to-cart-btn.disabled { background: #444; color: #888; cursor: not-allowed; }
+        .add-to-cart-btn.disabled { background: #444 !important; color: #888 !important; cursor: not-allowed !important; }
 
         .cart-float-btn {
             position: fixed; bottom: 15px; left: 15px; background: var(--primary-color); color: white;
@@ -359,7 +360,7 @@
                 const rawStatus = getValue(row, 'status') || 'متوفر';
                 const image = getValue(row, 'image_url') || '/logo.png';
 
-                // فحص حالة التوفر صراحة
+                // فحص حالة التوفر لهذا النوع المحدد
                 const isAvailable = !rawStatus.includes('غير') && !rawStatus.includes('نفذ') && !rawStatus.includes('لا');
 
                 const groupKey = `${category}_${name}`.trim();
@@ -367,11 +368,12 @@
                 if (!productsMap[groupKey]) {
                     productsMap[groupKey] = {
                         id: id, category: category, name: name, desc: desc, image: image,
-                        isAvailable: isAvailable, variants: []
+                        variants: []
                     };
                 }
 
-                productsMap[groupKey].variants.push({ size: variant || 'عادي', price: price });
+                // حفظ حالة التوفر لكل حجم/نوع بشكل مستقل
+                productsMap[groupKey].variants.push({ size: variant || 'عادي', price: price, isAvailable: isAvailable });
             });
 
             return Object.values(productsMap);
@@ -414,29 +416,16 @@
                 if (!productQuantities[prod.id]) productQuantities[prod.id] = 1;
 
                 const card = document.createElement('div');
-                card.className = `product-card ${!prod.isAvailable ? 'out-of-stock' : ''}`;
+                card.className = 'product-card';
+                card.id = `card-${prod.id}`;
                 
                 const optionsHtml = prod.variants.map((v, idx) => 
-                    `<option value="${idx}">${v.size} - ${v.price.toLocaleString()} ل.س</option>`
+                    `<option value="${idx}">${v.size} - ${v.price.toLocaleString()} ل.س ${!v.isAvailable ? '(غير متوفر)' : ''}</option>`
                 ).join('');
-
-                // شارة حالة التوفر
-                const statusBadgeHtml = prod.isAvailable 
-                    ? `<span class="status-badge available">متوفر</span>`
-                    : `<span class="status-badge unavailable">غير متوفر</span>`;
-
-                // زر الإضافة للحالة
-                const buttonHtml = prod.isAvailable
-                    ? `<button class="add-to-cart-btn" onclick="addToCart('${prod.id}')">
-                        <i class="fa-solid fa-cart-plus"></i> إضافة إلى الطلب
-                       </button>`
-                    : `<button class="add-to-cart-btn disabled" disabled>
-                        <i class="fa-solid fa-ban"></i> غير متوفر حالياً
-                       </button>`;
 
                 card.innerHTML = `
                     <div class="img-container">
-                        ${statusBadgeHtml}
+                        <div id="status-badge-${prod.id}"></div>
                         <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='/logo.png'">
                     </div>
                     <div class="product-details">
@@ -446,7 +435,7 @@
                         <div class="product-controls">
                             <div class="control-group">
                                 <span class="control-label">الحجم / الصنف:</span>
-                                <select class="form-select" id="size-${prod.id}" onchange="updatePriceDisplay('${prod.id}')" ${!prod.isAvailable ? 'disabled' : ''}>
+                                <select class="form-select" id="size-${prod.id}" onchange="updateVariantState('${prod.id}')">
                                     ${optionsHtml}
                                 </select>
                             </div>
@@ -454,9 +443,9 @@
                             <div class="control-group">
                                 <span class="control-label">الكمية:</span>
                                 <div class="qty-picker">
-                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', -1)" ${!prod.isAvailable ? 'disabled' : ''}>-</button>
+                                    <button class="qty-btn" id="btn-minus-${prod.id}" onclick="changeProductQty('${prod.id}', -1)">-</button>
                                     <span class="qty-val" id="qty-${prod.id}">${productQuantities[prod.id]}</span>
-                                    <button class="qty-btn" onclick="changeProductQty('${prod.id}', 1)" ${!prod.isAvailable ? 'disabled' : ''}>+</button>
+                                    <button class="qty-btn" id="btn-plus-${prod.id}" onclick="changeProductQty('${prod.id}', 1)">+</button>
                                 </div>
                             </div>
 
@@ -464,12 +453,54 @@
                                 ${prod.variants[0].price.toLocaleString()} ل.س
                             </div>
 
-                            ${buttonHtml}
+                            <div id="btn-container-${prod.id}"></div>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
+                updateVariantState(prod.id); // تحديث الواجهة فوراً للنوع المختار
             });
+        }
+
+        // دالة التحديث الديناميكي للمادة حسب النوع المختار
+        function updateVariantState(productId) {
+            const prod = productsData.find(p => p.id === productId);
+            if (!prod) return;
+
+            const selectEl = document.getElementById(`size-${productId}`);
+            const selectedVariant = prod.variants[selectEl.value];
+            const qty = productQuantities[productId] || 1;
+
+            const cardEl = document.getElementById(`card-${productId}`);
+            const badgeEl = document.getElementById(`status-badge-${productId}`);
+            const btnContainer = document.getElementById(`btn-container-${productId}`);
+            const btnMinus = document.getElementById(`btn-minus-${productId}`);
+            const btnPlus = document.getElementById(`btn-plus-${productId}`);
+
+            // تحديث السعر
+            document.getElementById(`price-${productId}`).innerText = `${(selectedVariant.price * qty).toLocaleString()} ل.س`;
+
+            if (selectedVariant.isAvailable) {
+                // حالة متوفر للنوع المختار
+                cardEl.classList.remove('out-of-stock');
+                badgeEl.innerHTML = `<span class="status-badge available">متوفر</span>`;
+                btnContainer.innerHTML = `
+                    <button class="add-to-cart-btn" onclick="addToCart('${productId}')">
+                        <i class="fa-solid fa-cart-plus"></i> إضافة إلى الطلب
+                    </button>`;
+                btnMinus.removeAttribute('disabled');
+                btnPlus.removeAttribute('disabled');
+            } else {
+                // حالة غير متوفر للنوع المختار
+                cardEl.classList.add('out-of-stock');
+                badgeEl.innerHTML = `<span class="status-badge unavailable">غير متوفر</span>`;
+                btnContainer.innerHTML = `
+                    <button class="add-to-cart-btn disabled" disabled>
+                        <i class="fa-solid fa-ban"></i> غير متوفر حالياً
+                    </button>`;
+                btnMinus.setAttribute('disabled', 'true');
+                btnPlus.setAttribute('disabled', 'true');
+            }
         }
 
         function changeProductQty(productId, delta) {
@@ -478,26 +509,17 @@
             if (current < 1) current = 1;
             productQuantities[productId] = current;
             document.getElementById(`qty-${productId}`).innerText = current;
-            updatePriceDisplay(productId);
-        }
-
-        function updatePriceDisplay(productId) {
-            const prod = productsData.find(p => p.id === productId);
-            if (!prod) return;
-            const selectEl = document.getElementById(`size-${productId}`);
-            const selectedVariant = prod.variants[selectEl.value];
-            const qty = productQuantities[productId] || 1;
-            const totalPrice = selectedVariant.price * qty;
-
-            document.getElementById(`price-${productId}`).innerText = `${totalPrice.toLocaleString()} ل.س`;
+            updateVariantState(productId);
         }
 
         function addToCart(productId) {
             const prod = productsData.find(p => p.id === productId);
-            if (!prod || !prod.isAvailable) return;
+            if (!prod) return;
             
             const selectEl = document.getElementById(`size-${productId}`);
             const selectedVariant = prod.variants[selectEl.value];
+            if (!selectedVariant.isAvailable) return;
+
             const qtyToAdd = productQuantities[productId] || 1;
 
             const cartItemKey = `${productId}_${selectedVariant.size}`;
@@ -514,7 +536,7 @@
 
             productQuantities[productId] = 1;
             document.getElementById(`qty-${productId}`).innerText = 1;
-            updatePriceDisplay(productId);
+            updateVariantState(productId);
             renderCart();
         }
 
