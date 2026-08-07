@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عالم الفواكه - المينيو الرقمي</title>
+    <title>طلبات عالم الفواكه - المينيو الرقمي</title>
+    
+    <!-- PWA Settings -->
+    <meta name="theme-color" content="#e50914">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22%D8%B7%D9%84%D8%A8%D8%A7%D8%AA%20%D8%B9%D8%A7%D9%84%D9%85%20%D8%A7%D9%84%D9%81%D9%88%D8%A7%D9%83%D9%87%22,%22short_name%22:%22%D8%B7%D9%84%D8%A8%D8%A7%D8%AA%20%D8%B9%D8%A7%D9%84%D9%85%20%D8%A7%D9%84%D9%81%D9%88%D8%A7%D9%83%D9%87%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22#121212%22,%22theme_color%22:%22#e50914%22}">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -11,16 +16,17 @@
     
     <style>
         :root {
-            --primary-color: #2e7d32;
-            --primary-light: #4caf50;
-            --accent-color: #ff9800;
-            --accent-hover: #e68a00;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --text-muted: #666666;
-            --border-color: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0,0,0,0.06);
+            --primary-color: #e50914;
+            --primary-light: #ff1e27;
+            --accent-color: #e50914;
+            --accent-hover: #b80710;
+            --bg-color: #121212;
+            --card-bg: #1a1a1a;
+            --card-sub-bg: #242424;
+            --text-color: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: #2e2e2e;
+            --shadow: 0 4px 20px rgba(0,0,0,0.5);
             --radius: 16px;
         }
 
@@ -40,13 +46,14 @@
 
         /* --- Header & Hero Section --- */
         header {
-            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            background: linear-gradient(135deg, #000000, #1c0304);
             color: white;
             padding: 30px 20px 40px;
             text-align: center;
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
-            box-shadow: 0 4px 20px rgba(46, 125, 50, 0.2);
+            border-bottom: 2px solid var(--primary-color);
+            box-shadow: 0 4px 25px rgba(229, 9, 20, 0.25);
             position: relative;
         }
 
@@ -59,27 +66,28 @@
         }
 
         .logo-icon {
-            font-size: 2.5rem;
-            color: #ffeb3b;
-            background: rgba(255, 255, 255, 0.15);
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            background: rgba(229, 9, 20, 0.1);
             width: 65px;
             height: 65px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid var(--primary-color);
         }
 
         .brand-name {
             font-size: 2.2rem;
             font-weight: 800;
             letter-spacing: -0.5px;
+            color: #ffffff;
         }
 
         .hero-tagline {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-size: 1.05rem;
+            color: var(--text-muted);
             font-weight: 500;
         }
 
@@ -104,10 +112,11 @@
             gap: 10px;
             overflow-x: auto;
             padding: 8px 10px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
             scrollbar-width: none;
         }
 
@@ -134,7 +143,7 @@
         .cat-btn.active {
             background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
         }
 
         /* --- Products Grid --- */
@@ -153,19 +162,20 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
         }
 
         .product-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: rgba(229, 9, 20, 0.4);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.15);
         }
 
         .product-img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            background-color: #eee;
+            background-color: #000;
         }
 
         .product-details {
@@ -179,7 +189,7 @@
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 6px;
-            color: #1a1a1a;
+            color: #ffffff;
         }
 
         .product-desc {
@@ -195,10 +205,10 @@
             flex-direction: column;
             gap: 12px;
             margin-top: auto;
-            background: #fdfdfd;
+            background: var(--card-sub-bg);
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid #f0f0f0;
+            border: 1px solid var(--border-color);
         }
 
         .control-group {
@@ -211,19 +221,19 @@
         .control-label {
             font-size: 0.85rem;
             font-weight: 700;
-            color: #555;
+            color: #ccc;
         }
 
         select.form-select {
             padding: 6px 10px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
-            background-color: white;
+            background-color: #121212;
             font-size: 0.9rem;
             outline: none;
             cursor: pointer;
             font-weight: 500;
-            color: #333;
+            color: #fff;
         }
 
         .qty-picker {
@@ -232,22 +242,22 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             overflow: hidden;
-            background: white;
+            background: #121212;
         }
 
         .qty-btn {
-            background: #f0f0f0;
+            background: #2a2a2a;
             border: none;
             width: 28px;
             height: 28px;
             font-weight: bold;
             cursor: pointer;
-            color: #333;
+            color: #fff;
             transition: background 0.2s;
         }
 
         .qty-btn:hover {
-            background: #e0e0e0;
+            background: var(--primary-color);
         }
 
         .qty-val {
@@ -255,6 +265,7 @@
             text-align: center;
             font-size: 0.9rem;
             font-weight: bold;
+            color: #fff;
         }
 
         .price-display {
@@ -298,7 +309,7 @@
             color: white;
             padding: 12px 22px;
             border-radius: 50px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -310,12 +321,12 @@
 
         .cart-float-btn:hover {
             transform: scale(1.05);
-            background: #256628;
+            background: var(--accent-hover);
         }
 
         .cart-badge {
-            background: var(--accent-color);
-            color: white;
+            background: #ffffff;
+            color: var(--primary-color);
             font-weight: bold;
             font-size: 0.85rem;
             padding: 2px 8px;
@@ -329,7 +340,7 @@
             box-shadow: var(--shadow);
             padding: 25px;
             margin-bottom: 40px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
         }
 
         .section-title {
@@ -340,7 +351,7 @@
             align-items: center;
             gap: 10px;
             color: var(--primary-color);
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
         }
 
@@ -357,20 +368,20 @@
 
         .cart-table th, .cart-table td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
             font-size: 0.95rem;
         }
 
         .cart-table th {
-            background: #fafafa;
-            color: #555;
+            background: var(--card-sub-bg);
+            color: var(--text-muted);
             font-weight: 700;
         }
 
         .remove-item-btn {
-            background: #ffebee;
-            color: #d32f2f;
-            border: none;
+            background: rgba(229, 9, 20, 0.15);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -379,11 +390,12 @@
         }
 
         .remove-item-btn:hover {
-            background: #ffcdd2;
+            background: var(--primary-color);
+            color: #fff;
         }
 
         .cart-summary {
-            background: #f9f9f9;
+            background: var(--card-sub-bg);
             padding: 15px 20px;
             border-radius: 12px;
             display: flex;
@@ -391,6 +403,7 @@
             gap: 10px;
             font-size: 1.05rem;
             margin-bottom: 25px;
+            border: 1px solid var(--border-color);
         }
 
         .summary-row {
@@ -402,7 +415,7 @@
         .summary-row.total {
             font-size: 1.25rem;
             font-weight: 800;
-            border-top: 1px dashed #ccc;
+            border-top: 1px dashed var(--border-color);
             padding-top: 10px;
             margin-top: 5px;
         }
@@ -428,13 +441,15 @@
         .form-group label {
             font-size: 0.9rem;
             font-weight: 700;
-            color: #444;
+            color: #ccc;
         }
 
         .form-input, .form-select-full {
             padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            background-color: #121212;
+            color: #fff;
             font-size: 0.95rem;
             outline: none;
             transition: border-color 0.2s;
@@ -470,12 +485,57 @@
             transform: scale(0.99);
         }
 
+        /* --- PWA Install Banner --- */
+        #pwa-install-banner {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #000000;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 12px 18px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5);
+            z-index: 1000;
+        }
+
+        #pwa-install-banner span {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        #pwa-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .loader-box {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
         /* --- Footer --- */
         footer {
-            background: #1a1a1a;
+            background: #080808;
             color: white;
             padding: 30px 20px;
             text-align: center;
+            border-top: 1px solid var(--border-color);
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
             margin-top: 50px;
@@ -492,7 +552,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
             color: white;
             display: flex;
             align-items: center;
@@ -500,6 +560,7 @@
             text-decoration: none;
             transition: background 0.3s, transform 0.2s;
             font-size: 1.1rem;
+            border: 1px solid var(--border-color);
         }
 
         .social-btn:hover {
@@ -516,7 +577,7 @@
         }
 
         .action-link {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
             color: #ddd;
             padding: 8px 16px;
             border-radius: 20px;
@@ -525,35 +586,18 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            border: 1px solid var(--border-color);
             transition: background 0.2s;
         }
 
         .action-link:hover {
-            background: rgba(255,255,255,0.18);
+            background: var(--primary-color);
             color: white;
         }
 
         .copyright {
             font-size: 0.85rem;
-            color: #888;
-        }
-
-        /* --- Media Print Stylesheet --- */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printable-receipt, #printable-receipt * {
-                visibility: visible;
-            }
-            #printable-receipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 80mm;
-                padding: 10px;
-                font-family: monospace, sans-serif;
-            }
+            color: #666;
         }
 
         .empty-cart-msg {
@@ -574,35 +618,26 @@
             </div>
             <h1 class="brand-name">عالم الفواكه</h1>
         </div>
-        <p class="hero-tagline">أشهى الوجبات العصائر الطبيعية الطازجة</p>
+        <p class="hero-tagline">أشهى الوجبات والعصائر الطبيعية الطازجة</p>
     </header>
 
     <main class="container">
         <!-- Sticky Category Navigation -->
         <div class="categories-wrapper">
-            <nav class="categories-nav">
+            <nav class="categories-nav" id="categories-nav">
                 <button class="cat-btn active" onclick="filterCategory('all')">
                     <i class="fa-solid fa-border-all"></i> الكل
-                </button>
-                <button class="cat-btn" onclick="filterCategory('pizza')">
-                    <i class="fa-solid fa-pizza-slice"></i> بيتزا
-                </button>
-                <button class="cat-btn" onclick="filterCategory('snacks')">
-                    <i class="fa-solid fa-burger"></i> سناكات وسندويشات
-                </button>
-                <button class="cat-btn" onclick="filterCategory('chicken')">
-                    <i class="fa-solid fa-drumstick-bite"></i> بروستد ومشوي
-                </button>
-                <button class="cat-btn" onclick="filterCategory('drinks')">
-                    <i class="fa-solid fa-glass-water"></i> عصائر ومشروبات
                 </button>
             </nav>
         </div>
 
-        <!-- Products Grid -->
-        <div class="products-grid" id="products-grid">
-            <!-- Dynamic Injection of Products -->
+        <!-- Dynamic Loader & Products Grid -->
+        <div id="loader-box" class="loader-box">
+            <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+            <div style="margin-top: 10px;">جاري تحميل المنيو المباشر...</div>
         </div>
+
+        <div class="products-grid" id="products-grid"></div>
 
         <!-- Shopping Cart & Order Form Section -->
         <section class="cart-section" id="cart-section">
@@ -615,16 +650,14 @@
                     <thead>
                         <tr>
                             <th>الصنف</th>
-                            <th>الحجم</th>
+                            <th>الحجم / النوع</th>
                             <th>العدد</th>
                             <th>السعر الفردي</th>
                             <th>الإجمالي</th>
                             <th>إزالة</th>
                         </tr>
                     </thead>
-                    <tbody id="cart-items">
-                        <!-- Dynamic Cart Rows -->
-                    </tbody>
+                    <tbody id="cart-items"></tbody>
                 </table>
                 <div id="empty-cart-msg" class="empty-cart-msg">السلة فارغة حالياً. قم بإضافة أصناف من المينيو!</div>
             </div>
@@ -634,7 +667,7 @@
                     <span>مجموع المنتجات:</span>
                     <span id="cart-subtotal">0 ل.س</span>
                 </div>
-                <div class="summary-row" id="delivery-row" style="display: none; color: #e65100;">
+                <div class="summary-row" id="delivery-row" style="display: none; color: #ff9800;">
                     <span>رسوم التوصيل:</span>
                     <span>10,000 ل.س</span>
                 </div>
@@ -644,7 +677,7 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #333;">تفاصيل الزبون والطلب</h3>
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #fff;">تفاصيل الزبون والطلب</h3>
             <form id="checkout-form" onsubmit="handleSendWhatsApp(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -683,183 +716,157 @@
         <span class="cart-badge" id="float-cart-count">0</span>
     </button>
 
+    <!-- PWA Installation Banner -->
+    <div id="pwa-install-banner">
+        <span>📲 ثبّت تطبيق طلبات عالم الفواكه</span>
+        <button id="pwa-btn">تثبيت الآن</button>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="brand-container" style="margin-bottom: 5px;">
-            <i class="fa-solid fa-lemon" style="color: #ffeb3b; font-size: 1.5rem;"></i>
+            <i class="fa-solid fa-lemon" style="color: var(--primary-color); font-size: 1.5rem;"></i>
             <h3 style="font-size: 1.4rem;">عالم الفواكه</h3>
         </div>
-        <p style="font-size: 0.85rem; color: #aaa;">أجود أنواع البيتزا والسناكات والعصائر الطبيعية</p>
+        <p style="font-size: 0.85rem; color: #888;">أجود أنواع العصائر الطبيعية والسناكات والوجبات الطازجة</p>
 
         <div class="footer-socials">
             <a href="#" class="social-btn" title="فيسبوك"><i class="fa-brands fa-facebook-f"></i></a>
             <a href="#" class="social-btn" title="إنستغرام"><i class="fa-brands fa-instagram"></i></a>
-            <a href="https://api.whatsapp.com/send?phone=963983831671" target="_blank" class="social-btn" title="واتساب"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=963951928490" target="_blank" class="social-btn" title="واتساب"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
 
         <div class="quick-actions">
             <a href="https://maps.google.com" target="_blank" class="action-link">
                 <i class="fa-solid fa-location-dot"></i> موقع المكان على الخريطة
             </a>
-            <a href="tel:0983831671" class="action-link">
+            <a href="tel:0951928490" class="action-link">
                 <i class="fa-solid fa-phone"></i> اتصل بنا فوراً
             </a>
         </div>
 
-        <p class="copyright">جميع الحقوق محفوظة &copy; 2026 - عالم الفواكه</p>
+        <p class="copyright">جميع الحقوق محفوظة &copy; 2026 - طلبات عالم الفواكه</p>
     </footer>
 
     <!-- JavaScript Application Logic -->
     <script>
-        // --- Central Products Data (Structured for easy integration with Google Sheets / Supabase) ---
-        const productsData = [
-            // البيتزا
-            {
-                id: 'p1',
-                category: 'pizza',
-                name: 'بيتزا مارغريتا',
-                desc: 'صلصة طماطم غنية، جبنة موزاريلا فاخرة، وريحان طازج',
-                image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'صغير', price: 25000 },
-                    { size: 'وسط', price: 35000 },
-                    { size: 'كبير', price: 45000 }
-                ]
-            },
-            {
-                id: 'p2',
-                category: 'pizza',
-                name: 'بيتزا ببروني',
-                desc: 'شرائح ببروني بقرية مع جبنة الموزاريلا والصلصة الإيطالية',
-                image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'صغير', price: 28000 },
-                    { size: 'وسط', price: 40000 },
-                    { size: 'كبير', price: 52000 }
-                ]
-            },
-            {
-                id: 'p3',
-                category: 'pizza',
-                name: 'بيتزا خضار مشكلة',
-                desc: 'فلفل رومي، زيتون، فطر، بصل، طماطم، وجبنة موزاريلا',
-                image: 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'صغير', price: 26000 },
-                    { size: 'وسط', price: 37000 },
-                    { size: 'كبير', price: 48000 }
-                ]
-            },
-
-            // سناكات وسندويشات
-            {
-                id: 's1',
-                category: 'snacks',
-                name: 'سندويش زنجر دجاج',
-                desc: 'صدر دجاج مقرمش، خس، صوص خاص، وجبنة شيدر',
-                image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'عادي', price: 18000 },
-                    { size: 'دبل', price: 25000 }
-                ]
-            },
-            {
-                id: 's2',
-                category: 'snacks',
-                name: 'برغر لحم سوبريم',
-                desc: 'شريحة لحم بقر طازجة، طماطم، مخلل، وصوص البرغر المميز',
-                image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'سنجل', price: 20000 },
-                    { size: 'دبل', price: 28000 }
-                ]
-            },
-            {
-                id: 's3',
-                category: 'snacks',
-                name: 'سندويش فاهيتا',
-                desc: 'شرائح دجاج محمرة مع الفلفل الملون والبصل والصوص المكيسكي',
-                image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'صموان عادي', price: 17000 },
-                    { size: 'خبز جامبو', price: 23000 }
-                ]
-            },
-
-            // بروستد ومشوي
-            {
-                id: 'c1',
-                category: 'chicken',
-                name: 'وجبة دجاج بروستد',
-                desc: 'قطع دجاج مقرمشة تقدم مع بطاطس، ثومية، وخبز',
-                image: 'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: '4 قطع', price: 45000 },
-                    { size: '8 قطع', price: 85000 }
-                ]
-            },
-            {
-                id: 'c2',
-                category: 'chicken',
-                name: 'دجاج مشوي على الفحم',
-                desc: 'دجاج متبل بالأعشاب والبهارات ومشوّي ببطء على الفحم',
-                image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'نصف دجاجة', price: 40000 },
-                    { size: 'دجاجة كاملة', price: 75000 }
-                ]
-            },
-
-            // عصائر ومشروبات
-            {
-                id: 'd1',
-                category: 'drinks',
-                name: 'عصير كوكتيل عالم الفواكه',
-                desc: 'مزيج طبيعي طازج من الفواكه الموسمية مع قطع الفواكه والأناناس',
-                image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'كأس وسط', price: 10000 },
-                    { size: 'كأس كبير', price: 14000 },
-                    { size: 'لتر', price: 28000 }
-                ]
-            },
-            {
-                id: 'd2',
-                category: 'drinks',
-                name: 'عصير برتقال طبيعي',
-                desc: 'برتقال طازج معصور فورياً بدون إضافة السكر',
-                image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'كأس وسط', price: 8000 },
-                    { size: 'كأس كبير', price: 12000 }
-                ]
-            },
-            {
-                id: 'd3',
-                category: 'drinks',
-                name: 'سموذي مانجو وفرولة',
-                desc: 'سموذي بارد ومنعش بطعم المانجو الطبيعية والفرولة',
-                image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=500&q=80',
-                variants: [
-                    { size: 'كأس وسط', price: 11000 },
-                    { size: 'كأس كبير', price: 15000 }
-                ]
-            }
-        ];
-
         // --- Application State ---
+        let productsData = [];
         let cart = [];
         let productQuantities = {};
+        let currentCategory = 'all';
         const DELIVERY_FEE = 10000;
+        
+        // الرقم الجديد المعتمد لمراسلة الواتساب
+        const WHATSAPP_PHONE = '963951928490';
 
-        // Phone number for WhatsApp business
-        const WHATSAPP_PHONE = '963983831671';
-
-        // --- Core Functions ---
         document.addEventListener('DOMContentLoaded', () => {
-            renderProducts('all');
+            fetchLiveMenu();
         });
 
+        // --- 1. Fetching Data from Netlify Function ---
+        async function fetchLiveMenu() {
+            try {
+                const response = await fetch('/.netlify/functions/get-menu');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const csvText = await response.text();
+                productsData = parseCSVData(csvText);
+
+                document.getElementById('loader-box').style.display = 'none';
+                buildCategoriesNav();
+                renderProducts(currentCategory);
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                document.getElementById('loader-box').innerHTML = `
+                    <div style="color: var(--primary-color);">
+                        ⚠️ فشل تحميل بيانات المنيو المباشرة.
+                        <br><small style="color:#aaa;">تأكد من ضبط متغيرات البيئة بداخل Netlify.</small>
+                    </div>`;
+            }
+        }
+
+        // --- 2. Smart CSV Parser ---
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(l => l.trim() !== '');
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+
+            const getValue = (rowObj, keyFragment) => {
+                for (let k in rowObj) {
+                    if (k.toLowerCase().includes(keyFragment.toLowerCase())) return rowObj[k];
+                }
+                return '';
+            };
+
+            const rawRows = lines.slice(1).map(line => {
+                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
+                let obj = {};
+                headers.forEach((h, idx) => { obj[h] = values[idx] || ''; });
+                return obj;
+            });
+
+            const productsMap = {};
+
+            rawRows.forEach((row, idx) => {
+                const id = getValue(row, 'item_id') || `item_${idx}`;
+                const category = getValue(row, 'category') || 'عام';
+                const name = getValue(row, 'item_name') || 'مادة';
+                const variant = getValue(row, 'variant') || 'عادي';
+                const rawPrice = getValue(row, 'price');
+                const price = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+                const desc = getValue(row, 'description') || '';
+                const status = getValue(row, 'status') || 'متوفر';
+                const image = getValue(row, 'image_url') || 'https://via.placeholder.com/500/121212/e50914?text=طلبات+عالم+الفواكه';
+
+                if (status.includes('غير') || status.includes('نفذت')) return;
+
+                const groupKey = `${category}_${name}`.trim();
+
+                if (!productsMap[groupKey]) {
+                    productsMap[groupKey] = {
+                        id: id,
+                        category: category,
+                        name: name,
+                        desc: desc,
+                        image: image,
+                        variants: []
+                    };
+                }
+
+                productsMap[groupKey].variants.push({
+                    size: variant || 'عادي',
+                    price: price
+                });
+            });
+
+            return Object.values(productsMap);
+        }
+
+        // --- 3. Dynamic Category Builder ---
+        function buildCategoriesNav() {
+            const categories = ['all', ...new Set(productsData.map(p => p.category).filter(Boolean))];
+            const nav = document.getElementById('categories-nav');
+            
+            nav.innerHTML = categories.map(cat => {
+                const isAll = cat === 'all';
+                const label = isAll ? 'الكل' : cat;
+                const icon = isAll ? 'fa-border-all' : 'fa-utensils';
+                return `
+                    <button class="cat-btn ${cat === currentCategory ? 'active' : ''}" onclick="filterCategory('${cat}')">
+                        <i class="fa-solid ${icon}"></i> ${label}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            buildCategoriesNav();
+            renderProducts(cat);
+        }
+
+        // --- 4. Render Products ---
         function renderProducts(category) {
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
@@ -867,6 +874,11 @@
             const filtered = category === 'all' 
                 ? productsData 
                 : productsData.filter(p => p.category === category);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">لا توجد مواد متوفرة في هذا القسم حالياً.</div>';
+                return;
+            }
 
             filtered.forEach(prod => {
                 if (!productQuantities[prod.id]) {
@@ -876,20 +888,19 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Variants Options HTML
                 const optionsHtml = prod.variants.map((v, idx) => 
                     `<option value="${idx}">${v.size} - ${v.price.toLocaleString()} ل.س</option>`
                 ).join('');
 
                 card.innerHTML = `
-                    <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy">
+                    <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='https://via.placeholder.com/500/121212/e50914?text=طلبات+عالم+الفواكه'">
                     <div class="product-details">
                         <h3 class="product-title">${prod.name}</h3>
                         <p class="product-desc">${prod.desc}</p>
                         
                         <div class="product-controls">
                             <div class="control-group">
-                                <span class="control-label">الحجم:</span>
+                                <span class="control-label">الحجم / الصنف:</span>
                                 <select class="form-select" id="size-${prod.id}" onchange="updatePriceDisplay('${prod.id}')">
                                     ${optionsHtml}
                                 </select>
@@ -918,12 +929,6 @@
             });
         }
 
-        function filterCategory(cat) {
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            renderProducts(cat);
-        }
-
         function changeProductQty(productId, delta) {
             let current = productQuantities[productId] || 1;
             current += delta;
@@ -935,6 +940,7 @@
 
         function updatePriceDisplay(productId) {
             const prod = productsData.find(p => p.id === productId);
+            if (!prod) return;
             const selectEl = document.getElementById(`size-${productId}`);
             const selectedVariant = prod.variants[selectEl.value];
             const qty = productQuantities[productId] || 1;
@@ -943,12 +949,12 @@
             document.getElementById(`price-${productId}`).innerText = `${totalPrice.toLocaleString()} ل.س`;
         }
 
-        // --- Cart Management Logic ---
+        // --- 5. Cart Logic ---
         function addToCart(productId) {
             const prod = productsData.find(p => p.id === productId);
+            if (!prod) return;
             const selectEl = document.getElementById(`size-${productId}`);
-            const selectedVariantIndex = selectEl.value;
-            const selectedVariant = prod.variants[selectedVariantIndex];
+            const selectedVariant = prod.variants[selectEl.value];
             const qtyToAdd = productQuantities[productId] || 1;
 
             const cartItemKey = `${productId}_${selectedVariant.size}`;
@@ -1047,7 +1053,7 @@
             document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- WhatsApp Messaging Logic ---
+        // --- 6. Send Order to WhatsApp & Cashier Print ---
         function handleSendWhatsApp(event) {
             event.preventDefault();
 
@@ -1064,24 +1070,38 @@
             let subtotal = 0;
             let itemsListText = '';
 
+            const orderData = {
+                id: 'ORD-' + Date.now().toString().slice(-6),
+                date: new Date().toLocaleString('ar-SY'),
+                customer: { name, phone, address, orderType },
+                items: [...cart],
+                subtotal: 0,
+                deliveryFee: (orderType === 'توصيل') ? DELIVERY_FEE : 0,
+                total: 0
+            };
+
             cart.forEach((item, idx) => {
                 const itemSubtotal = item.unitPrice * item.qty;
                 subtotal += itemSubtotal;
-                itemsListText += `${idx + 1}. *${item.name}* (${item.size})
-   العدد: ${item.qty} | السعر: ${itemSubtotal.toLocaleString()} ل.س
-`;
+                itemsListText += `${idx + 1}. *${item.name}* (${item.size})\n   العدد: ${item.qty} | السعر: ${itemSubtotal.toLocaleString()} ل.س\n`;
             });
 
-            const isDelivery = (orderType === 'توصيل');
-            const deliveryFee = isDelivery ? DELIVERY_FEE : 0;
-            const grandTotal = subtotal + deliveryFee;
+            orderData.subtotal = subtotal;
+            orderData.total = subtotal + orderData.deliveryFee;
 
-            let deliveryText = isDelivery ? `
-🛵 *رسوم التوصيل:* 10,000 ل.س` : '';
+            // 1. حفظ الطلب محلياً ليقرأه الكاشير
+            let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
+            existingOrders.unshift(orderData);
+            localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
+
+            // 2. إرسال إلى الرقم الجديد عبر الواتساب (963951928490)
+            const isDelivery = (orderType === 'توصيل');
+            let deliveryText = isDelivery ? `\n🛵 *رسوم التوصيل:* 10,000 ل.س` : '';
 
             const message = 
 `🍹 *طلب جديد - عالم الفواكه* 🍹
 ---------------------------------
+🔢 *رقم الطلب:* ${orderData.id}
 👤 *اسم الزبون:* ${name}
 📞 *رقم الهاتف:* ${phone}
 📍 *العنوان:* ${address}
@@ -1090,7 +1110,7 @@
 📝 *تفاصيل الطلب:*
 ${itemsListText}---------------------------------
 💵 *مجموع المنتجات:* ${subtotal.toLocaleString()} ل.س${deliveryText}
-💰 *المجموع الكلي:* *${grandTotal.toLocaleString()} ل.س*
+💰 *المجموع الكلي:* *${orderData.total.toLocaleString()} ل.س*
 ---------------------------------
 شكراً لاختياركم عالم الفواكه!`;
 
@@ -1098,7 +1118,100 @@ ${itemsListText}---------------------------------
             const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMsg}`;
 
             window.open(whatsappUrl, '_blank');
+
+            // 3. فتح شباك طباعة الكاشير
+            openReceiptWindow(orderData);
         }
+
+        // دالة فتح وتصميم فاتورة الكاشير القابلة للطباعة
+        function openReceiptWindow(order) {
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            
+            const itemsRows = order.items.map(item => `
+                <tr>
+                    <td>${item.name} (${item.size})</td>
+                    <td style="text-align:center;">${item.qty}</td>
+                    <td style="text-align:left;">${(item.unitPrice * item.qty).toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>فاتورة ${order.id}</title>
+                    <style>
+                        body { font-family: monospace; width: 80mm; padding: 10px; margin: 0 auto; color: #000; }
+                        .text-center { text-align: center; }
+                        .line { border-bottom: 1px dashed #000; margin: 8px 0; }
+                        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+                        th { border-bottom: 1px solid #000; text-align: right; }
+                        td { padding: 4px 0; }
+                        .total-box { font-weight: bold; font-size: 14px; margin-top: 10px; }
+                        @media print { button { display: none; } }
+                    </style>
+                </head>
+                <body onload="window.print()">
+                    <div class="text-center">
+                        <h2>🍎 عالم الفواكه</h2>
+                        <p>إيصال طلب كاشير</p>
+                        <p>رقم الطلب: ${order.id}</p>
+                        <p>التاريخ: ${order.date}</p>
+                    </div>
+                    <div class="line"></div>
+                    <p><strong>الزبون:</strong> ${order.customer.name}</p>
+                    <p><strong>الهاتف:</strong> ${order.customer.phone}</p>
+                    <p><strong>النوع:</strong> ${order.customer.orderType}</p>
+                    <p><strong>العنوان:</strong> ${order.customer.address}</p>
+                    <div class="line"></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المادة</th>
+                                <th style="text-align:center;">العدد</th>
+                                <th style="text-align:left;">المجموع</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsRows}</tbody>
+                    </table>
+                    <div class="line"></div>
+                    <div class="total-box">
+                        <p>المجموع: ${order.subtotal.toLocaleString()} ل.س</p>
+                        ${order.deliveryFee > 0 ? `<p>التوصيل: ${order.deliveryFee.toLocaleString()} ل.س</p>` : ''}
+                        <p style="font-size:16px;">الإجمالي: ${order.total.toLocaleString()} ل.س</p>
+                    </div>
+                    <div class="line"></div>
+                    <div class="text-center">
+                        <p>شكراً لزيارتكم!</p>
+                        <button onclick="window.print()" style="padding:8px 16px; cursor:pointer;">🖨️ طباعة الفاتورة</button>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+        }
+
+        // --- 7. PWA Installation Script ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwa-install-banner').style.display = 'flex';
+        });
+
+        document.getElementById('pwa-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('pwa-install-banner').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
     </script>
 </body>
 </html>
