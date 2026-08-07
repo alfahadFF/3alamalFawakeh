@@ -1,17 +1,25 @@
-const fetch = require('node-fetch');
-
 exports.handler = async function (event, context) {
-  const GOOGLE_SHEET_CSV_URL = process.env.GOOGLE_SHEET_CSV_URL;
+  // قراءة رابط غوغل شيت من متغيرات البيئة
+  const sheetUrl = process.env.GOOGLE_SHEET_CSV_URL;
 
-  if (!GOOGLE_SHEET_CSV_URL) {
+  if (!sheetUrl) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "لم يتم إعداد رابط غوغل شيت في متغيرات البيئة." })
+      body: JSON.stringify({ error: "GOOGLE_SHEET_CSV_URL variable is missing" }),
     };
   }
 
   try {
-    const response = await fetch(GOOGLE_SHEET_CSV_URL);
+    // استخدام fetch المدمجة أصلياً في Node.js
+    const response = await fetch(sheetUrl);
+
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        body: `Failed to fetch Google Sheet: ${response.statusText}`,
+      };
+    }
+
     const csvData = await response.text();
 
     return {
@@ -19,14 +27,14 @@ exports.handler = async function (event, context) {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "max-age=60, public"
+        "Cache-Control": "no-cache",
       },
-      body: csvData
+      body: csvData,
     };
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "فشل في جلب البيانات" })
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
