@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الكاشير - طلبات عالم الفواكه</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #121212; color: #fff; padding: 20px; }
+        h1 { color: #e50914; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .order-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; }
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; color: #e50914; font-weight: bold; }
+        .print-btn { width: 100%; background: #e50914; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .print-btn:hover { background: #b80710; }
+    </style>
+</head>
+<body>
+
+    <h1>📊 شاشة الكاشير والطباعة - طلبات عالم الفواكه</h1>
+    <div class="orders-grid" id="orders-list"></div>
+
+    <script>
+        function loadOrders() {
+            const container = document.getElementById('orders-list');
+            const orders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="color:#888;">لا توجد طلبات جديدة حالياً.</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <span>${order.id}</span>
+                        <span>${order.customer.orderType}</span>
+                    </div>
+                    <p><strong>الزبون:</strong> ${order.customer.name} (${order.customer.phone})</p>
+                    <p><strong>العنوان:</strong> ${order.customer.address}</p>
+                    <hr style="border-color:#333; margin:8px 0;">
+                    <ul>
+                        ${order.items.map(i => `<li>${i.name} - ${i.size} × ${i.qty}</li>`).join('')}
+                    </ul>
+                    <p style="margin-top:8px; font-weight:bold; color:#e50914;">الإجمالي: ${order.total.toLocaleString()} ل.س</p>
+                    <button class="print-btn" onclick='printSingleOrder(${JSON.stringify(order)})'>🖨️ طباعة الفاتورة</button>
+                </div>
+            `).join('');
+        }
+
+        function printSingleOrder(order) {
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            // نفس كود الطباعة في openReceiptWindow
+            printWindow.document.write(`<html><body onload="window.print()"><h2 style="text-align:center;">عالم الفواكه</h2><p>طلب رقم: ${order.id}</p><p>الزبون: ${order.customer.name}</p><p>الإجمالي: ${order.total} ل.س</p></body></html>`);
+            printWindow.document.close();
+        }
+
+        setInterval(loadOrders, 3000); // تحديث تلقائي كل 3 ثوانٍ
+        loadOrders();
+    </script>
+</body>
+</html>
