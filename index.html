@@ -34,17 +34,24 @@
 
         header {
             background: linear-gradient(135deg, #000000, #1c0304);
-            color: white; padding: 30px 20px 40px; text-align: center;
+            color: white; padding: 25px 20px 35px; text-align: center;
             border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
             border-bottom: 2px solid var(--primary-color);
             box-shadow: 0 4px 25px rgba(229, 9, 20, 0.25); position: relative;
         }
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 12px; }
-        .logo-icon {
-            font-size: 2.2rem; color: var(--primary-color); background: rgba(229, 9, 20, 0.1);
-            width: 65px; height: 65px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; border: 2px solid var(--primary-color);
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        
+        /* تنسيق الشعار logo.png المرفوع */
+        .brand-logo-img {
+            width: 65px;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+            background-color: #000;
         }
+
         .brand-name { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; }
         .hero-tagline { font-size: 1.05rem; color: var(--text-muted); font-weight: 500; }
 
@@ -154,7 +161,8 @@
 
     <header>
         <div class="brand-container">
-            <div class="logo-icon"><i class="fa-solid fa-lemon"></i></div>
+            <!-- استدعاء اللوغو logo.png -->
+            <img src="/logo.png" alt="عالم الفواكه" class="brand-logo-img" onerror="this.src='/icon-192.png'">
             <h1 class="brand-name">عالم الفواكه</h1>
         </div>
         <p class="hero-tagline">أشهى الوجبات والعصائر الطبيعية الطازجة</p>
@@ -256,7 +264,7 @@
 
     <footer>
         <div class="brand-container" style="margin-bottom: 5px;">
-            <i class="fa-solid fa-lemon" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <img src="/logo.png" alt="عالم الفواكه" style="width: 30px; height: 30px; border-radius: 50%;" onerror="this.style.display='none'">
             <h3 style="font-size: 1.4rem;">عالم الفواكه</h3>
         </div>
         <p style="font-size: 0.85rem; color: #888;">أجود أنواع العصائر الطبيعية والسناكات والوجبات الطازجة</p>
@@ -338,7 +346,7 @@
                 const price = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
                 const desc = getValue(row, 'description') || '';
                 const status = getValue(row, 'status') || 'متوفر';
-                const image = getValue(row, 'image_url') || 'https://via.placeholder.com/500/121212/e50914?text=طلبات+عالم+الفواكه';
+                const image = getValue(row, 'image_url') || '/logo.png';
 
                 if (status.includes('غير') || status.includes('نفذت')) return;
 
@@ -400,7 +408,7 @@
                 ).join('');
 
                 card.innerHTML = `
-                    <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='https://via.placeholder.com/500/121212/e50914?text=طلبات+عالم+الفواكه'">
+                    <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy" onerror="this.src='/logo.png'">
                     <div class="product-details">
                         <h3 class="product-title">${prod.name}</h3>
                         <p class="product-desc">${prod.desc}</p>
