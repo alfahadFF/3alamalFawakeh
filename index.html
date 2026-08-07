@@ -16,9 +16,7 @@
     <style>
         :root {
             --primary-color: #e50914;
-            --primary-light: #ff1e27;
-            --accent-color: #e50914;
-            --accent-hover: #b80710;
+            --primary-hover: #b80710;
             --bg-color: #121212;
             --card-bg: #1a1a1a;
             --card-sub-bg: #242424;
@@ -34,134 +32,134 @@
 
         header {
             background: linear-gradient(135deg, #000000, #1c0304);
-            color: white; padding: 25px 20px 35px; text-align: center;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            color: white; padding: 20px 15px 30px; text-align: center;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
             border-bottom: 2px solid var(--primary-color);
             box-shadow: 0 4px 25px rgba(229, 9, 20, 0.25); position: relative;
         }
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
         
-        /* تنسيق الشعار logo.png المرفوع */
         .brand-logo-img {
-            width: 65px;
-            height: 65px;
-            object-fit: cover;
-            border-radius: 50%;
+            width: 60px; height: 60px;
+            object-fit: cover; border-radius: 50%;
             border: 2px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+            box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
             background-color: #000;
         }
 
-        .brand-name { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; color: #ffffff; }
-        .hero-tagline { font-size: 1.05rem; color: var(--text-muted); font-weight: 500; }
+        .brand-name { font-size: 2rem; font-weight: 800; color: #ffffff; }
+        .hero-tagline { font-size: 0.95rem; color: var(--text-muted); font-weight: 500; }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 15px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 12px; }
 
-        .categories-wrapper { position: sticky; top: 10px; z-index: 100; margin-top: -25px; margin-bottom: 25px; }
+        .categories-wrapper { position: sticky; top: 10px; z-index: 100; margin-top: -20px; margin-bottom: 20px; }
         .categories-nav {
-            display: flex; gap: 10px; overflow-x: auto; padding: 8px 10px;
+            display: flex; gap: 8px; overflow-x: auto; padding: 8px;
             background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px);
             border-radius: 50px; border: 1px solid var(--border-color);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); scrollbar-width: none;
         }
         .categories-nav::-webkit-scrollbar { display: none; }
         .cat-btn {
-            background: transparent; border: none; padding: 10px 20px; border-radius: 30px;
-            font-size: 0.95rem; font-weight: 700; color: var(--text-muted); cursor: pointer;
-            white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+            background: transparent; border: none; padding: 8px 18px; border-radius: 30px;
+            font-size: 0.9rem; font-weight: 700; color: var(--text-muted); cursor: pointer;
+            white-space: nowrap; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;
         }
         .cat-btn.active { background: var(--primary-color); color: white; box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4); }
 
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: 1fr; }
+        }
+
         .product-card {
             background: var(--card-bg); border-radius: var(--radius); overflow: hidden;
             box-shadow: var(--shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: flex; flex-direction: column; border: 1px solid var(--border-color);
         }
-        .product-card:hover { transform: translateY(-4px); border-color: rgba(229, 9, 20, 0.4); box-shadow: 0 8px 25px rgba(229, 9, 20, 0.15); }
-        .product-img { width: 100%; height: 180px; object-fit: cover; background-color: #000; }
-        .product-details { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        .product-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
-        .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
+        .product-card:hover { border-color: rgba(229, 9, 20, 0.4); }
+        .product-img { width: 100%; height: 170px; object-fit: cover; background-color: #000; }
+        .product-details { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: #ffffff; }
+        .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
         
         .product-controls {
-            display: flex; flex-direction: column; gap: 12px; margin-top: auto;
-            background: var(--card-sub-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);
+            display: flex; flex-direction: column; gap: 10px; margin-top: auto;
+            background: var(--card-sub-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color);
         }
-        .control-group { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .control-group { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .control-label { font-size: 0.85rem; font-weight: 700; color: #ccc; }
         select.form-select {
             padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color);
-            background-color: #121212; font-size: 0.9rem; outline: none; cursor: pointer; font-weight: 500; color: #fff;
+            background-color: #121212; font-size: 0.85rem; outline: none; cursor: pointer; font-weight: 500; color: #fff;
         }
         .qty-picker { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #121212; }
-        .qty-btn { background: #2a2a2a; border: none; width: 28px; height: 28px; font-weight: bold; cursor: pointer; color: #fff; transition: background 0.2s; }
-        .qty-btn:hover { background: var(--primary-color); }
+        .qty-btn { background: #2a2a2a; border: none; width: 32px; height: 32px; font-size: 1rem; font-weight: bold; cursor: pointer; color: #fff; }
+        .qty-btn:active { background: var(--primary-color); }
         .qty-val { width: 32px; text-align: center; font-size: 0.9rem; font-weight: bold; color: #fff; }
         .price-display { font-size: 1.1rem; font-weight: 800; color: var(--primary-color); text-align: left; }
 
         .add-to-cart-btn {
-            width: 100%; background: var(--accent-color); color: white; border: none; padding: 10px;
+            width: 100%; background: var(--primary-color); color: white; border: none; padding: 11px;
             border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .add-to-cart-btn:hover { background: var(--accent-hover); }
+        .add-to-cart-btn:active { background: var(--primary-hover); }
 
         .cart-float-btn {
-            position: fixed; bottom: 20px; left: 20px; background: var(--primary-color); color: white;
-            padding: 12px 22px; border-radius: 50px; box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
-            display: flex; align-items: center; gap: 12px; cursor: pointer; z-index: 99; border: none; transition: transform 0.2s;
+            position: fixed; bottom: 15px; left: 15px; background: var(--primary-color); color: white;
+            padding: 12px 20px; border-radius: 50px; box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+            display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 99; border: none;
         }
         .cart-badge { background: #ffffff; color: var(--primary-color); font-weight: bold; font-size: 0.85rem; padding: 2px 8px; border-radius: 20px; }
 
-        .cart-section { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 25px; margin-bottom: 40px; border: 1px solid var(--border-color); }
-        .section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .cart-section { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 15px; margin-bottom: 30px; border: 1px solid var(--border-color); }
+        .section-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
         
-        .cart-table-wrapper { overflow-x: auto; margin-bottom: 20px; }
-        .cart-table { width: 100%; border-collapse: collapse; text-align: right; }
-        .cart-table th, .cart-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        .cart-table-wrapper { overflow-x: auto; margin-bottom: 15px; }
+        .cart-table { width: 100%; border-collapse: collapse; text-align: right; min-width: 320px; }
+        .cart-table th, .cart-table td { padding: 10px 8px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
         .cart-table th { background: var(--card-sub-bg); color: var(--text-muted); font-weight: 700; }
-        .remove-item-btn { background: rgba(229, 9, 20, 0.15); color: var(--primary-color); border: 1px solid var(--primary-color); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+        .remove-item-btn { background: rgba(229, 9, 20, 0.15); color: var(--primary-color); border: 1px solid var(--primary-color); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
 
-        .cart-summary { background: var(--card-sub-bg); padding: 15px 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 1.05rem; margin-bottom: 25px; border: 1px solid var(--border-color); }
+        .cart-summary { background: var(--card-sub-bg); padding: 12px 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; margin-bottom: 20px; border: 1px solid var(--border-color); }
         .summary-row { display: flex; justify-content: space-between; align-items: center; }
-        .summary-row.total { font-size: 1.25rem; font-weight: 800; border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 5px; }
+        .summary-row.total { font-size: 1.2rem; font-weight: 800; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.9rem; font-weight: 700; color: #ccc; }
-        .form-input, .form-select-full { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #121212; color: #fff; font-size: 0.95rem; outline: none; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { font-size: 0.85rem; font-weight: 700; color: #ccc; }
+        .form-input, .form-select-full, .form-textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #121212; color: #fff; font-size: 0.9rem; outline: none; }
+        .form-textarea { resize: vertical; min-height: 70px; }
 
         .send-whatsapp-btn {
             width: 100%; background: #25d366; color: white; border: none; padding: 14px;
-            border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            border-radius: 10px; font-size: 1.05rem; font-weight: 800; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
 
         #pwa-install-banner {
-            position: fixed; bottom: 15px; left: 15px; right: 15px; max-width: 500px; margin: 0 auto;
+            position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 500px; margin: 0 auto;
             background-color: #000000; border: 2px solid var(--primary-color); border-radius: 12px;
-            padding: 12px 18px; display: none; align-items: center; justify-content: space-between;
+            padding: 10px 15px; display: none; align-items: center; justify-content: space-between;
             box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5); z-index: 1000;
         }
-        #pwa-btn { background-color: var(--primary-color); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        #pwa-btn { background-color: var(--primary-color); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
 
-        .loader-box { text-align: center; padding: 50px 20px; color: var(--primary-color); font-size: 1.2rem; font-weight: bold; }
+        .loader-box { text-align: center; padding: 40px 20px; color: var(--primary-color); font-size: 1.1rem; font-weight: bold; }
 
-        footer { background: #080808; color: white; padding: 30px 20px; text-align: center; border-top: 1px solid var(--border-color); border-top-left-radius: 20px; border-top-right-radius: 20px; margin-top: 50px; }
-        .footer-socials { display: flex; justify-content: center; gap: 15px; margin: 15px 0 20px; }
-        .social-btn { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.05); color: white; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid var(--border-color); }
-        .quick-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-        .action-link { background: rgba(255,255,255,0.05); color: #ddd; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border-color); }
-        .copyright { font-size: 0.85rem; color: #666; }
-        .empty-cart-msg { text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.95rem; }
+        footer { background: #080808; color: white; padding: 25px 15px; text-align: center; border-top: 1px solid var(--border-color); border-top-left-radius: 20px; border-top-right-radius: 20px; margin-top: 40px; }
+        .footer-socials { display: flex; justify-content: center; gap: 12px; margin: 12px 0 15px; }
+        .social-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.05); color: white; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid var(--border-color); }
+        .copyright { font-size: 0.8rem; color: #666; }
+        .empty-cart-msg { text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="brand-container">
-            <!-- استدعاء اللوغو logo.png -->
             <img src="/logo.png" alt="عالم الفواكه" class="brand-logo-img" onerror="this.src='/icon-192.png'">
             <h1 class="brand-name">عالم الفواكه</h1>
         </div>
@@ -179,7 +177,7 @@
 
         <div id="loader-box" class="loader-box">
             <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
-            <div style="margin-top: 10px;">جاري تحميل المنيو المباشر...</div>
+            <div style="margin-top: 10px;">جاري تحميل المنيو...</div>
         </div>
 
         <div class="products-grid" id="products-grid"></div>
@@ -194,9 +192,9 @@
                             <th>الصنف</th>
                             <th>الحجم / النوع</th>
                             <th>العدد</th>
-                            <th>السعر الفردي</th>
+                            <th>السعر</th>
                             <th>الإجمالي</th>
-                            <th>إزالة</th>
+                            <th>حذف</th>
                         </tr>
                     </thead>
                     <tbody id="cart-items"></tbody>
@@ -209,9 +207,9 @@
                     <span>مجموع المنتجات:</span>
                     <span id="cart-subtotal">0 ل.س</span>
                 </div>
-                <div class="summary-row" id="delivery-row" style="display: none; color: #ff9800;">
-                    <span>رسوم التوصيل:</span>
-                    <span>10,000 ل.س</span>
+                <div class="summary-row" id="delivery-row" style="display: none; color: #25d366;">
+                    <span>رسوم التوصيل (داخل داعل):</span>
+                    <span>مجاني</span>
                 </div>
                 <div class="summary-row total">
                     <span>المجموع الكلي:</span>
@@ -219,9 +217,15 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #fff;">تفاصيل الزبون والطلب</h3>
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: #fff;">تفاصيل الزبون والطلب</h3>
             <form id="checkout-form" onsubmit="handleSendWhatsApp(event)">
                 <div class="form-grid">
+                    <!-- حقل الملاحظات والطلبات الخاصة بـ مربع نص طويل -->
+                    <div class="form-group full-width">
+                        <label for="cust-notes">ملاحظات أو طلبات خاصة (مثل: بدون مخلل، بدون ثوم...):</label>
+                        <textarea id="cust-notes" class="form-textarea" placeholder="اكتب هنا أي تعديلات ترغب بها على الطلب..."></textarea>
+                    </div>
+
                     <div class="form-group">
                         <label for="cust-name">الاسم الكامل <span style="color:red">*</span></label>
                         <input type="text" id="cust-name" class="form-input" placeholder="أدخل اسمك" required>
@@ -231,21 +235,22 @@
                         <input type="tel" id="cust-phone" class="form-input" placeholder="09xxxxxxxx" required>
                     </div>
                     <div class="form-group">
-                        <label for="cust-address">العنوان التفصيلي <span style="color:red">*</span></label>
-                        <input type="text" id="cust-address" class="form-input" placeholder="المنطقة - الشارع - البناء" required>
-                    </div>
-                    <div class="form-group">
                         <label for="order-type">نوع الطلب <span style="color:red">*</span></label>
                         <select id="order-type" class="form-select-full" onchange="handleOrderTypeChange()" required>
-                            <option value="توصيل">توصيل للمنزل (+10,000 ل.س)</option>
+                            <option value="توصيل داخل داعل">توصيل داخل داعل (مجاني)</option>
+                            <option value="توصيل خارج داعل">توصيل خارج داعل (تحدد التكلفة حسب المسافة)</option>
                             <option value="سفري">سفري (استلام من المحل)</option>
                             <option value="صالة">تناول في الصالة</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="cust-address">العنوان التفصيلي <span style="color:red">*</span></label>
+                        <input type="text" id="cust-address" class="form-input" placeholder="الحي - الشارع - علامة مميزة" required>
+                    </div>
                 </div>
 
                 <button type="submit" class="send-whatsapp-btn">
-                    <i class="fa-brands fa-whatsapp" style="font-size: 1.4rem;"></i> تأكيد وإرسال الطلب عبر الواتساب
+                    <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> تأكيد وإرسال الطلب عبر الواتساب
                 </button>
             </form>
         </section>
@@ -264,24 +269,14 @@
 
     <footer>
         <div class="brand-container" style="margin-bottom: 5px;">
-            <img src="/logo.png" alt="عالم الفواكه" style="width: 30px; height: 30px; border-radius: 50%;" onerror="this.style.display='none'">
-            <h3 style="font-size: 1.4rem;">عالم الفواكه</h3>
+            <img src="/logo.png" alt="عالم الفواكه" style="width: 28px; height: 28px; border-radius: 50%;" onerror="this.style.display='none'">
+            <h3 style="font-size: 1.2rem;">عالم الفواكه</h3>
         </div>
-        <p style="font-size: 0.85rem; color: #888;">أجود أنواع العصائر الطبيعية والسناكات والوجبات الطازجة</p>
+        <p style="font-size: 0.8rem; color: #888;">أجود أنواع العصائر الطبيعية والسناكات والوجبات الطازجة</p>
 
         <div class="footer-socials">
-            <a href="#" class="social-btn" title="فيسبوك"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" class="social-btn" title="إنستغرام"><i class="fa-brands fa-instagram"></i></a>
             <a href="https://api.whatsapp.com/send?phone=963951928490" target="_blank" class="social-btn" title="واتساب"><i class="fa-brands fa-whatsapp"></i></a>
-        </div>
-
-        <div class="quick-actions">
-            <a href="https://maps.google.com" target="_blank" class="action-link">
-                <i class="fa-solid fa-location-dot"></i> موقع المكان على الخريطة
-            </a>
-            <a href="tel:0951928490" class="action-link">
-                <i class="fa-solid fa-phone"></i> اتصل بنا فوراً
-            </a>
+            <a href="tel:0951928490" class="social-btn" title="اتصال"><i class="fa-solid fa-phone"></i></a>
         </div>
 
         <p class="copyright">جميع الحقوق محفوظة &copy; 2026 - طلبات عالم الفواكه</p>
@@ -292,7 +287,6 @@
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
-        const DELIVERY_FEE = 10000;
         const WHATSAPP_PHONE = '963951928490';
 
         document.addEventListener('DOMContentLoaded', () => { fetchLiveMenu(); });
@@ -338,9 +332,13 @@
             const productsMap = {};
 
             rawRows.forEach((row, idx) => {
+                const name = getValue(row, 'item_name');
+                
+                // تجاهل الأسطر الفارغة التي لا تحتوي على اسم مادة
+                if (!name || name.trim() === '') return;
+
                 const id = getValue(row, 'item_id') || `item_${idx}`;
                 const category = getValue(row, 'category') || 'عام';
-                const name = getValue(row, 'item_name') || 'مادة';
                 const variant = getValue(row, 'variant') || 'عادي';
                 const rawPrice = getValue(row, 'price');
                 const price = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
@@ -527,13 +525,20 @@
             }
 
             const orderType = document.getElementById('order-type').value;
-            const isDelivery = (orderType === 'توصيل');
-            const deliveryFee = (isDelivery && cart.length > 0) ? DELIVERY_FEE : 0;
-            const grandTotal = subtotal + deliveryFee;
+            const deliveryRow = document.getElementById('delivery-row');
 
-            document.getElementById('delivery-row').style.display = (isDelivery && cart.length > 0) ? 'flex' : 'none';
+            if (orderType === 'توصيل داخل داعل' && cart.length > 0) {
+                deliveryRow.style.display = 'flex';
+                deliveryRow.innerHTML = `<span>رسوم التوصيل (داخل داعل):</span><span style="color:#25d366; font-weight:bold;">مجاني</span>`;
+            } else if (orderType === 'توصيل خارج داعل' && cart.length > 0) {
+                deliveryRow.style.display = 'flex';
+                deliveryRow.innerHTML = `<span>رسوم التوصيل (خارج داعل):</span><span style="color:#ff9800; font-weight:bold;">تُحدد حسب المسافة</span>`;
+            } else {
+                deliveryRow.style.display = 'none';
+            }
+
             document.getElementById('cart-subtotal').innerText = `${subtotal.toLocaleString()} ل.س`;
-            document.getElementById('cart-total').innerText = `${grandTotal.toLocaleString()} ل.س`;
+            document.getElementById('cart-total').innerText = `${subtotal.toLocaleString()} ل.س`;
             document.getElementById('float-cart-count').innerText = totalCount;
         }
 
@@ -549,6 +554,7 @@
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
+            const notes = document.getElementById('cust-notes').value.trim();
             const orderType = document.getElementById('order-type').value;
 
             let subtotal = 0; let itemsListText = '';
@@ -556,9 +562,8 @@
             const orderData = {
                 id: 'ORD-' + Date.now().toString().slice(-6),
                 date: new Date().toLocaleString('ar-SY'),
-                customer: { name, phone, address, orderType },
-                items: [...cart], subtotal: 0,
-                deliveryFee: (orderType === 'توصيل') ? DELIVERY_FEE : 0, total: 0
+                customer: { name, phone, address, notes, orderType },
+                items: [...cart], subtotal: 0, total: 0
             };
 
             cart.forEach((item, idx) => {
@@ -568,16 +573,23 @@
             });
 
             orderData.subtotal = subtotal;
-            orderData.total = subtotal + orderData.deliveryFee;
+            orderData.total = subtotal;
 
-            // حفظ الطلب للكاشير
+            // حفظ الطلب للكاشير محلياً
             let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
             existingOrders.unshift(orderData);
             localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
 
-            // إرسال للواتساب
-            const isDelivery = (orderType === 'توصيل');
-            let deliveryText = isDelivery ? `\n🛵 *رسوم التوصيل:* 10,000 ل.س` : '';
+            // نص التوصيل
+            let deliveryNoteText = '';
+            if (orderType === 'توصيل داخل داعل') {
+                deliveryNoteText = `🛵 *رسوم التوصيل:* مجاني (داخل داعل)\n`;
+            } else if (orderType === 'توصيل خارج داعل') {
+                deliveryNoteText = `🛵 *رسوم التوصيل:* تحدد حسب المسافة (خارج داعل)\n`;
+            }
+
+            // نص الملاحظات
+            let notesText = notes ? `📌 *ملاحظات الطلب:* ${notes}\n` : '';
 
             const message = 
 `🍹 *طلب جديد - عالم الفواكه* 🍹
@@ -587,11 +599,11 @@
 📞 *رقم الهاتف:* ${phone}
 📍 *العنوان:* ${address}
 🛵 *نوع الطلب:* ${orderType}
----------------------------------
+${notesText}---------------------------------
 📝 *تفاصيل الطلب:*
 ${itemsListText}---------------------------------
-💵 *مجموع المنتجات:* ${subtotal.toLocaleString()} ل.س${deliveryText}
-💰 *المجموع الكلي:* *${orderData.total.toLocaleString()} ل.س*
+💵 *مجموع المنتجات:* ${subtotal.toLocaleString()} ل.س
+${deliveryNoteText}💰 *الإجمالي النهائي:* *${subtotal.toLocaleString()} ل.س*
 ---------------------------------
 شكراً لاختياركم عالم الفواكه!`;
 
