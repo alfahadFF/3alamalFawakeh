@@ -99,7 +99,7 @@
         .empty-orders { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; }
 
         /* ================================================= */
-        /* تصميم الفاتورة الحرارية للطباعة 80mm Print CSS */
+        /* تنسيق الفاتورة المطبوعة 80mm Print CSS           */
         /* ================================================= */
         #printable-receipt { display: none; }
 
@@ -116,7 +116,7 @@
             }
 
             .p-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
-            .p-logo { width: 55px; height: 55px; object-fit: contain; margin-bottom: 4px; }
+            .p-logo { width: 75px; height: 75px; object-fit: contain; margin-bottom: 4px; filter: contrast(150%); }
             .p-title { font-size: 17px; font-weight: 900; margin: 2px 0; }
             .p-meta { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
             .p-phone { font-size: 12px; font-weight: bold; direction: ltr; display: inline-block; }
@@ -148,7 +148,7 @@
 
     <header class="cashier-header">
         <h1 class="cashier-title"><i class="fa-solid fa-cash-register"></i> شاشة الكاشير والطلبات</h1>
-        <p class="cashier-subtitle">مطعم عالم الفواكه - إدارة الوراد</p>
+        <p class="cashier-subtitle">مطعم عالم الفواكه - إدارة الوارد</p>
     </header>
 
     <div class="toolbar">
@@ -245,7 +245,8 @@
             const receiptContainer = document.getElementById('printable-receipt');
             receiptContainer.innerHTML = `
                 <div class="p-header">
-                    <img src="/logo.png" class="p-logo" alt="لوغو المطعم" onerror="this.style.display='none'">
+                    <!-- استخدام الشعار الأسود Black-logo المرفوع على GitHub -->
+                    <img src="/Black-logo.png" class="p-logo" alt="لوغو المطعم" onerror="this.src='/Black-logo.svg'; this.onerror=function(){this.src='/logo.png';};">
                     <div class="p-title">مطعم عالم الفواكه</div>
                     <div class="p-meta">بإدارة: قسيم الحريري</div>
                     <div class="p-meta">هاتف: <span class="p-phone">0938174782</span></div>
