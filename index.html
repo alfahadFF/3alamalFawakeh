@@ -99,24 +99,32 @@
         .product-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
         
         .product-controls {
-            display: flex; flex-direction: column; gap: 10px; margin-top: auto;
+            display: flex; flex-direction: column; gap: 8px; margin-top: auto;
             background: var(--card-sub-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color);
         }
         .control-group { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .control-label { font-size: 0.85rem; font-weight: 700; color: #ccc; }
+        .control-label { font-size: 0.82rem; font-weight: 700; color: #ccc; white-space: nowrap; }
+        
         select.form-select {
             padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color);
-            background-color: #121212; font-size: 0.85rem; outline: none; cursor: pointer; font-weight: 500; color: #fff;
+            background-color: #121212; font-size: 0.85rem; outline: none; cursor: pointer; font-weight: 500; color: #fff; width: 100%;
         }
+
+        .item-note-input {
+            width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border-color);
+            background-color: #121212; color: #fff; font-size: 0.82rem; outline: none; transition: border-color 0.2s;
+        }
+        .item-note-input:focus { border-color: var(--primary-color); }
+
         .qty-picker { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #121212; }
-        .qty-btn { background: #2a2a2a; border: none; width: 32px; height: 32px; font-size: 1rem; font-weight: bold; cursor: pointer; color: #fff; }
+        .qty-btn { background: #2a2a2a; border: none; width: 30px; height: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; color: #fff; }
         .qty-btn:active { background: var(--primary-color); }
-        .qty-val { width: 32px; text-align: center; font-size: 0.9rem; font-weight: bold; color: #fff; }
+        .qty-val { width: 30px; text-align: center; font-size: 0.85rem; font-weight: bold; color: #fff; }
         .price-display { font-size: 1.1rem; font-weight: 800; color: var(--primary-color); text-align: left; }
 
         .add-to-cart-btn {
-            width: 100%; background: var(--primary-color); color: white; border: none; padding: 11px;
-            border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            width: 100%; background: var(--primary-color); color: white; border: none; padding: 10px;
+            border-radius: 8px; font-size: 0.92rem; font-weight: 700; cursor: pointer;
             transition: background 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .add-to-cart-btn:active { background: var(--primary-hover); }
@@ -129,14 +137,33 @@
         }
         .cart-badge { background: #ffffff; color: var(--primary-color); font-weight: bold; font-size: 0.85rem; padding: 2px 8px; border-radius: 20px; }
 
-        .cart-section { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 15px; margin-bottom: 30px; border: 1px solid var(--border-color); }
-        .section-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
-        
+        /* قسم الفاتورة في الصفحة */
+        .cart-section { 
+            background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); 
+            padding: 20px 16px; margin-bottom: 30px; border: 1px solid var(--border-color); 
+        }
+        .section-title { 
+            font-size: 1.25rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; 
+            gap: 8px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 8px; 
+        }
+
         .cart-table-wrapper { overflow-x: auto; margin-bottom: 15px; }
-        .cart-table { width: 100%; border-collapse: collapse; text-align: right; min-width: 320px; }
-        .cart-table th, .cart-table td { padding: 10px 8px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; }
+        .cart-table { width: 100%; border-collapse: collapse; text-align: right; min-width: 360px; }
+        .cart-table th, .cart-table td { padding: 10px 8px; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; vertical-align: middle; }
         .cart-table th { background: var(--card-sub-bg); color: var(--text-muted); font-weight: 700; }
-        .remove-item-btn { background: rgba(229, 9, 20, 0.15); color: var(--primary-color); border: 1px solid var(--primary-color); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+        
+        .cart-item-details { display: flex; flex-direction: column; gap: 3px; }
+        .cart-item-title { font-weight: 700; color: #fff; font-size: 0.9rem; }
+        .cart-item-custom-note {
+            font-size: 0.75rem; color: #ffb74d; background: rgba(255, 183, 77, 0.1);
+            padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; width: fit-content;
+        }
+
+        .remove-item-btn {
+            background: rgba(229, 9, 20, 0.15); color: var(--primary-color); border: 1px solid var(--primary-color);
+            width: 28px; height: 28px; border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
+        }
+        .remove-item-btn:hover { background: var(--primary-color); color: #fff; }
 
         .cart-summary { background: var(--card-sub-bg); padding: 12px 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; margin-bottom: 20px; border: 1px solid var(--border-color); }
         .summary-row { display: flex; justify-content: space-between; align-items: center; }
@@ -147,30 +174,75 @@
         .form-group.full-width { grid-column: 1 / -1; }
         .form-group label { font-size: 0.85rem; font-weight: 700; color: #ccc; }
         .form-input, .form-select-full, .form-textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #121212; color: #fff; font-size: 0.9rem; outline: none; }
-        .form-textarea { resize: vertical; min-height: 70px; }
+        .form-textarea { resize: vertical; min-height: 60px; }
 
         .send-whatsapp-btn {
             width: 100%; background: #25d366; color: white; border: none; padding: 14px;
             border-radius: 10px; font-size: 1.05rem; font-weight: 800; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            transition: background 0.2s ease;
         }
+        .send-whatsapp-btn:hover { background: #1eb956; }
 
-        /* النافذة المنبثقة للتأكيد الإرسال للواتساب */
+        /* نافذة معاينة الفاتورة المنبثقة وترويستها الرسمية */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
-            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 15px;
+            background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 2000; padding: 12px;
         }
         .modal-card {
-            background: #1a1a1a; border: 2px solid #25d366; border-radius: 16px;
-            padding: 25px 20px; text-align: center; max-width: 420px; width: 100%;
-            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.3);
+            background: #181818; border: 2px solid #333; border-radius: 20px;
+            padding: 20px 16px; max-width: 480px; width: 100%; max-height: 92vh;
+            overflow-y: auto; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.9);
         }
-        .modal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
-        .modal-desc { font-size: 0.9rem; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 10px; flex-direction: column; }
-        .modal-btn-confirm { background: #25d366; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
-        .modal-btn-cancel { background: transparent; color: #e50914; border: 1px solid #e50914; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+
+        /* ترويسة الفاتورة المعتمدة */
+        .receipt-official-header {
+            background: linear-gradient(135deg, #111, #222);
+            border: 1px dashed #444; border-radius: 14px;
+            padding: 14px; margin-bottom: 15px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .receipt-brand-meta { display: flex; align-items: center; gap: 10px; }
+        .receipt-logo-thumb {
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary-color);
+            object-fit: cover; background: #000;
+        }
+        .receipt-titles h3 { font-size: 1.1rem; color: #fff; font-weight: 800; margin-bottom: 2px; }
+        .receipt-titles .mgr-name { font-size: 0.82rem; color: #ffca28; font-weight: bold; }
+        .receipt-titles .mgr-phone { font-size: 0.8rem; color: #25d366; direction: ltr; display: inline-block; font-weight: bold; }
+        
+        .receipt-qr-wrapper { text-align: center; min-width: 75px; }
+        .receipt-qr-thumb {
+            width: 65px; height: 65px; background: #fff; padding: 3px; border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5); object-fit: contain;
+        }
+        .receipt-qr-note { font-size: 0.65rem; color: #aaa; margin-top: 3px; display: block; line-height: 1.1; }
+
+        .modal-receipt-body {
+            background: var(--card-sub-bg); border-radius: 12px; padding: 12px;
+            font-size: 0.86rem; line-height: 1.6; border: 1px solid #333; margin-bottom: 15px;
+        }
+        .receipt-item-row {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 6px 0; border-bottom: 1px solid #2e2e2e;
+        }
+        .receipt-item-row:last-child { border-bottom: none; }
+        .receipt-total-row {
+            display: flex; justify-content: space-between; border-top: 2px dashed #444;
+            padding-top: 8px; margin-top: 6px; font-size: 1.05rem; font-weight: 800; color: var(--primary-color);
+        }
+
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-btn-confirm {
+            flex: 2; background: #25d366; color: #000; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 800; font-size: 0.95rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .modal-btn-cancel {
+            flex: 1; background: transparent; color: #bbb; border: 1px solid #444; padding: 12px;
+            border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+        }
 
         #pwa-install-banner {
             position: fixed; bottom: 12px; left: 12px; right: 12px; max-width: 500px; margin: 0 auto;
@@ -186,7 +258,7 @@
         .footer-socials { display: flex; justify-content: center; gap: 12px; margin: 12px 0 15px; }
         .social-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.05); color: white; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid var(--border-color); }
         .copyright { font-size: 0.8rem; color: #666; }
-        .empty-cart-msg { text-align: center; color: var(--text-muted); padding: 15px; font-size: 0.9rem; }
+        .empty-cart-msg { text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -215,6 +287,7 @@
 
         <div class="products-grid" id="products-grid"></div>
 
+        <!-- قسم السلة وتفاصيل الطلب في الصفحة -->
         <section class="cart-section" id="cart-section">
             <h2 class="section-title"><i class="fa-solid fa-receipt"></i> قائمة الطلبات والفاتورة</h2>
 
@@ -222,22 +295,22 @@
                 <table class="cart-table">
                     <thead>
                         <tr>
-                            <th>الصنف</th>
-                            <th>الحجم / النوع</th>
+                            <th>الصنف والملاحظة</th>
+                            <th>الحجم</th>
                             <th>العدد</th>
                             <th>السعر</th>
                             <th>الإجمالي</th>
-                            <th>حذف</th>
+                            <th>إلغاء</th>
                         </tr>
                     </thead>
                     <tbody id="cart-items"></tbody>
                 </table>
-                <div id="empty-cart-msg" class="empty-cart-msg">السلة فارغة حالياً. قم بإضافة أصناف من المينيو!</div>
+                <div id="empty-cart-msg" class="empty-cart-msg">السلة فارغة حالياً. قم بإضافة أصناف من المينيو في الأعلى!</div>
             </div>
 
             <div class="cart-summary">
                 <div class="summary-row">
-                    <span>مجموع المنتجات:</span>
+                    <span>مجموع الأصناف:</span>
                     <span id="cart-subtotal">0 ل.س</span>
                 </div>
                 <div class="summary-row" id="delivery-row" style="display: none; color: #25d366;">
@@ -250,12 +323,15 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: #fff;">تفاصيل الزبون والطلب</h3>
-            <form id="checkout-form" onsubmit="handleSendWhatsApp(event)">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: #fff;">
+                <i class="fa-solid fa-truck-ramp-box"></i> تفاصيل الزبون وعنوان التوصيل
+            </h3>
+            
+            <form id="checkout-form" onsubmit="handleOpenConfirmModal(event)">
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label for="cust-notes">ملاحظات أو طلبات خاصة (مثل: بدون مخلل، بدون ثوم...):</label>
-                        <textarea id="cust-notes" class="form-textarea" placeholder="اكتب هنا أي تعديلات ترغب بها على الطلب..."></textarea>
+                        <label for="cust-notes">ملاحظات عامة على الفاتورة (اختياري):</label>
+                        <textarea id="cust-notes" class="form-textarea" placeholder="اكتب هنا أي ملاحظات إضافية بخصوص وقت التوصيل أو طريقة الدفع..."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -282,36 +358,54 @@
                 </div>
 
                 <button type="submit" class="send-whatsapp-btn">
-                    <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> تأكيد وإرسال الطلب عبر الواتساب
+                    <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> متابعة وتأكيد الطلب
                 </button>
             </form>
         </section>
     </main>
 
-    <!-- نافذة تأكيد الإرسال بالواتساب -->
+    <!-- نافذة الفاتورة المعتمدة التي تظهر عند الضغط على تأكيد الطلب -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-card">
-            <div class="modal-title">💬 هل أتممت إرسال الرسالة عبر الواتساب؟</div>
-            <p class="modal-desc">
-                تم تحويلك إلى تطبيق الواتساب. يُرجى تأكيد إرسال الرسالة للمطعم ليتم اعتماد طلبك بداخل النظام وتسجيله للكاشير.
-            </p>
+            
+            <!-- ترويسة الفاتورة الرسمية المطلوبة -->
+            <div class="receipt-official-header">
+                <div class="receipt-brand-meta">
+                    <img src="/logo.png" alt="لوغو" class="receipt-logo-thumb" onerror="this.src='/icon-192.png'">
+                    <div class="receipt-titles">
+                        <h3>مطعم عالم الفواكه</h3>
+                        <div class="mgr-name"><i class="fa-solid fa-user-tie"></i> بإدارة: قسيم الحريري</div>
+                        <div class="mgr-phone"><i class="fa-solid fa-phone"></i> 0938174782</div>
+                    </div>
+                </div>
+                <div class="receipt-qr-wrapper">
+                    <img src="/qr-code.png" alt="كود المنيو" class="receipt-qr-thumb" onerror="this.src='/logo.png'">
+                    <span class="receipt-qr-note">📲 امسح الكود لطلب جديد</span>
+                </div>
+            </div>
+
+            <!-- محتويات الفاتورة -->
+            <div class="modal-receipt-body" id="modal-receipt-body"></div>
+
             <div class="modal-actions">
-                <button class="modal-btn-confirm" onclick="confirmOrderSuccess()">
-                    <i class="fa-solid fa-check-circle"></i> نعم، قمت بإرسال الرسالة
+                <button class="modal-btn-confirm" onclick="processFinalOrder()">
+                    <i class="fa-brands fa-whatsapp"></i> تأكيد وإرسال للواتساب
                 </button>
-                <button class="modal-btn-cancel" onclick="cancelPendingOrder()">
-                    <i class="fa-solid fa-times-circle"></i> إلغاء الطلب (لم أرسل)
+                <button class="modal-btn-cancel" onclick="closeConfirmModal()">
+                    تعديل الطلب
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- زر الفاتورة العائم -->
     <button class="cart-float-btn" onclick="scrollToCart()">
         <i class="fa-solid fa-cart-shopping"></i>
         <span>الفاتورة</span>
         <span class="cart-badge" id="float-cart-count">0</span>
     </button>
 
+    <!-- شريط تثبيت التطبيق PWA -->
     <div id="pwa-install-banner">
         <span>📲 ثبّت تطبيق طلبات عالم الفواكه</span>
         <button id="pwa-btn">تثبيت الآن</button>
@@ -320,13 +414,13 @@
     <footer>
         <div class="brand-container" style="margin-bottom: 5px;">
             <img src="/logo.png" alt="عالم الفواكه" style="width: 28px; height: 28px; border-radius: 50%;" onerror="this.style.display='none'">
-            <h3 style="font-size: 1.2rem;">عالم الفواكه</h3>
+            <h3 style="font-size: 1.2rem;">مطعم عالم الفواكه</h3>
         </div>
-        <p style="font-size: 0.8rem; color: #888;">أجود أنواع العصائر الطبيعية والسناكات والوجبات الطازجة</p>
+        <p style="font-size: 0.8rem; color: #888;">بإدارة: قسيم الحريري - هاتف: 0938174782</p>
 
         <div class="footer-socials">
             <a href="https://api.whatsapp.com/send?phone=963957984951" target="_blank" class="social-btn" title="واتساب"><i class="fa-brands fa-whatsapp"></i></a>
-            <a href="tel:0957984951" class="social-btn" title="اتصال"><i class="fa-solid fa-phone"></i></a>
+            <a href="tel:0938174782" class="social-btn" title="اتصال"><i class="fa-solid fa-phone"></i></a>
         </div>
 
         <p class="copyright">جميع الحقوق محفوظة &copy; 2026 - طلبات عالم الفواكه</p>
@@ -337,10 +431,15 @@
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
-        let pendingOrderData = null; // طلب مؤقت ينتظر تأكيد الزبون
+        let pendingOrderData = null;
+        
+        // أرقام المطعم والإدارة
         const WHATSAPP_PHONE = '963957984951';
+        const MANAGER_PHONE = '0938174782';
 
-        document.addEventListener('DOMContentLoaded', () => { fetchLiveMenu(); });
+        document.addEventListener('DOMContentLoaded', () => { 
+            fetchLiveMenu();
+        });
 
         async function fetchLiveMenu() {
             try {
@@ -472,6 +571,11 @@
                                     ${optionsHtml}
                                 </select>
                             </div>
+
+                            <!-- حقل ملاحظات الصنف -->
+                            <div class="control-group">
+                                <input type="text" id="note-${prod.id}" class="item-note-input" placeholder="ملاحظة لهذا الصنف (مثال: بدون شطة، زيادة مايونيز)..." maxlength="80">
+                            </div>
                             
                             <div class="control-group">
                                 <span class="control-label">الكمية:</span>
@@ -549,9 +653,12 @@
             const selectedVariant = prod.variants[selectEl.value];
             if (!selectedVariant.isAvailable) return;
 
+            const noteInput = document.getElementById(`note-${productId}`);
+            const itemNote = noteInput ? noteInput.value.trim() : '';
+
             const qtyToAdd = productQuantities[productId] || 1;
 
-            const cartItemKey = `${productId}_${selectedVariant.size}`;
+            const cartItemKey = `${productId}_${selectedVariant.size}_${itemNote}`;
             const existingIndex = cart.findIndex(item => item.key === cartItemKey);
 
             if (existingIndex > -1) {
@@ -559,12 +666,15 @@
             } else {
                 cart.push({
                     key: cartItemKey, id: productId, name: prod.name,
-                    size: selectedVariant.size, unitPrice: selectedVariant.price, qty: qtyToAdd
+                    size: selectedVariant.size, unitPrice: selectedVariant.price,
+                    qty: qtyToAdd, note: itemNote
                 });
             }
 
             productQuantities[productId] = 1;
             document.getElementById(`qty-${productId}`).innerText = 1;
+            if (noteInput) noteInput.value = '';
+            
             updateVariantState(productId);
             renderCart();
         }
@@ -587,7 +697,12 @@
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><strong>${item.name}</strong></td>
+                        <td>
+                            <div class="cart-item-details">
+                                <span class="cart-item-title">${item.name}</span>
+                                ${item.note ? `<span class="cart-item-custom-note"><i class="fa-solid fa-pen"></i> ${item.note}</span>` : ''}
+                            </div>
+                        </td>
                         <td>${item.size}</td>
                         <td>
                             <div class="qty-picker" style="display:inline-flex;">
@@ -599,7 +714,7 @@
                         <td>${item.unitPrice.toLocaleString()} ل.س</td>
                         <td><strong>${itemTotal.toLocaleString()} ل.س</strong></td>
                         <td>
-                            <button class="remove-item-btn" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                            <button class="remove-item-btn" title="حذف الصنف" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
                         </td>
                     `;
                     cartTbody.appendChild(row);
@@ -625,14 +740,21 @@
         }
 
         function handleOrderTypeChange() { renderCart(); }
-        function updateCartItemQty(index, delta) { cart[index].qty += delta; if (cart[index].qty <= 0) cart.splice(index, 1); renderCart(); }
+        function updateCartItemQty(index, delta) { 
+            cart[index].qty += delta; 
+            if (cart[index].qty <= 0) cart.splice(index, 1); 
+            renderCart(); 
+        }
         function removeCartItem(index) { cart.splice(index, 1); renderCart(); }
         function scrollToCart() { document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' }); }
 
-        // بدء عملية الإرسال بالواتساب بوضع الطلب قيد الانتظار المؤقت
-        function handleSendWhatsApp(event) {
+        // فتح نافذة الفاتورة للمعاينة قبل الإرسال
+        function handleOpenConfirmModal(event) {
             event.preventDefault();
-            if (cart.length === 0) { alert('سلة الطلبات فارغة!'); return; }
+            if (cart.length === 0) { 
+                alert('سلة الطلبات فارغة! يرجى إضافة وجبات أو مشروبات أولاً.'); 
+                return; 
+            }
 
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
@@ -640,81 +762,120 @@
             const notes = document.getElementById('cust-notes').value.trim();
             const orderType = document.getElementById('order-type').value;
 
-            let subtotal = 0; let itemsListText = '';
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            cart.forEach((item, idx) => {
+                const itemTotal = item.unitPrice * item.qty;
+                subtotal += itemTotal;
+                itemsHtml += `
+                    <div class="receipt-item-row">
+                        <div>
+                            <strong>${idx + 1}. ${item.name}</strong> (${item.size}) × ${item.qty}
+                            ${item.note ? `<div style="color:#ffb74d; font-size:0.75rem;">👈 ملاحظة: ${item.note}</div>` : ''}
+                        </div>
+                        <div><strong>${itemTotal.toLocaleString()} ل.س</strong></div>
+                    </div>
+                `;
+            });
 
             pendingOrderData = {
                 id: 'ORD-' + Date.now().toString().slice(-6),
                 date: new Date().toLocaleString('ar-SY'),
                 customer: { name, phone, address, notes, orderType },
-                items: [...cart], subtotal: 0, total: 0
+                items: [...cart],
+                subtotal: subtotal,
+                total: subtotal
             };
 
-            cart.forEach((item, idx) => {
-                const itemSubtotal = item.unitPrice * item.qty;
-                subtotal += itemSubtotal;
-                itemsListText += `${idx + 1}. *${item.name}* (${item.size})\n   العدد: ${item.qty} | السعر: ${itemSubtotal.toLocaleString()} ل.س\n`;
-            });
+            const modalReceiptBody = document.getElementById('modal-receipt-body');
+            modalReceiptBody.innerHTML = `
+                <div style="font-size:0.8rem; color:#aaa; margin-bottom:8px; display:flex; justify-content:space-between;">
+                    <span>رقم الفاتورة: <strong>${pendingOrderData.id}</strong></span>
+                    <span>${pendingOrderData.date}</span>
+                </div>
+                <div style="border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:8px;">
+                    <div>👤 <strong>الزبون:</strong> ${name} | 📞 ${phone}</div>
+                    <div>📍 <strong>العنوان:</strong> ${address} (${orderType})</div>
+                    ${notes ? `<div>📌 <strong>ملاحظات عامة:</strong> ${notes}</div>` : ''}
+                </div>
+                <div style="margin-bottom:8px;">
+                    ${itemsHtml}
+                </div>
+                <div class="receipt-total-row">
+                    <span>الإجمالي الكلي:</span>
+                    <span>${subtotal.toLocaleString()} ل.س</span>
+                </div>
+            `;
 
-            pendingOrderData.subtotal = subtotal;
-            pendingOrderData.total = subtotal;
-
-            let deliveryNoteText = '';
-            if (orderType === 'توصيل داخل داعل') {
-                deliveryNoteText = `🛵 *رسوم التوصيل:* مجاني (داخل داعل)\n`;
-            } else if (orderType === 'توصيل خارج داعل') {
-                deliveryNoteText = `🛵 *رسوم التوصيل:* تحدد حسب المسافة (خارج داعل)\n`;
-            }
-
-            let notesText = notes ? `📌 *ملاحظات الطلب:* ${notes}\n` : '';
-
-            const message = 
-`🍹 *طلب جديد - عالم الفواكه* 🍹
----------------------------------
-🔢 *رقم الطلب:* ${pendingOrderData.id}
-👤 *اسم الزبون:* ${name}
-📞 *رقم الهاتف:* ${phone}
-📍 *العنوان:* ${address}
-🛵 *نوع الطلب:* ${orderType}
-${notesText}---------------------------------
-📝 *تفاصيل الطلب:*
-${itemsListText}---------------------------------
-💵 *مجموع المنتجات:* ${subtotal.toLocaleString()} ل.س
-${deliveryNoteText}💰 *الإجمالي النهائي:* *${subtotal.toLocaleString()} ل.س*
----------------------------------
-شكراً لاختياركم عالم الفواكه!`;
-
-            // فتح الواتساب في نافذة جديدة
-            window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
-
-            // إظهار النافذة المنبثقة للتأكيد في المتصفح
             document.getElementById('confirm-modal').style.display = 'flex';
         }
 
-        // عند تأكيد الزبون بأنه أرسل الرسالة فعلياً
-        function confirmOrderSuccess() {
-            if (pendingOrderData) {
-                let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
-                existingOrders.unshift(pendingOrderData);
-                localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
-
-                alert('تم اعتماد طلبك وإرساله للكاشير بنجاح! شكراً لك.');
-                pendingOrderData = null;
-                cart = [];
-                renderCart();
-                document.getElementById('checkout-form').reset();
-            }
+        function closeConfirmModal() {
             document.getElementById('confirm-modal').style.display = 'none';
         }
 
-        // عند اختيار الزبون الإلغاء وعدم الإرسال
-        function cancelPendingOrder() {
-            pendingOrderData = null;
+        // إرسال الطلب وحفظه للكاشير مع الترويسة المكتوبة
+        function processFinalOrder() {
+            if (!pendingOrderData) return;
+
+            // 1. حفظ في سجل الكاشير
+            let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
+            existingOrders.unshift(pendingOrderData);
+            localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
+
+            // 2. تجميع نص الفاتورة للواتساب مع الترويسة
+            let itemsListText = '';
+            pendingOrderData.items.forEach((item, idx) => {
+                const itemSubtotal = item.unitPrice * item.qty;
+                const notePart = item.note ? `\n   👈 *ملاحظة:* ${item.note}` : '';
+                itemsListText += `${idx + 1}. *${item.name}* (${item.size})\n   العدد: ${item.qty} | السعر: ${itemSubtotal.toLocaleString()} ل.س${notePart}\n`;
+            });
+
+            let deliveryNoteText = '';
+            if (pendingOrderData.customer.orderType === 'توصيل داخل داعل') {
+                deliveryNoteText = `🛵 *رسوم التوصيل:* مجاني (داخل داعل)\n`;
+            } else if (pendingOrderData.customer.orderType === 'توصيل خارج داعل') {
+                deliveryNoteText = `🛵 *رسوم التوصيل:* تحدد حسب المسافة (خارج داعل)\n`;
+            }
+
+            let generalNotes = pendingOrderData.customer.notes ? `📌 *ملاحظات عامة:* ${pendingOrderData.customer.notes}\n` : '';
+
+            const message = 
+`🧾 *فاتورة طلب - مطعم عالم الفواكه* 🧾
+👑 *بإدارة:* قسيم الحريري
+📞 *هاتف الإدارة:* ${MANAGER_PHONE}
+---------------------------------
+🔢 *رقم الفاتورة:* ${pendingOrderData.id}
+📅 *التاريخ:* ${pendingOrderData.date}
+👤 *اسم الزبون:* ${pendingOrderData.customer.name}
+📞 *رقم الهاتف:* ${pendingOrderData.customer.phone}
+📍 *العنوان:* ${pendingOrderData.customer.address}
+🛵 *نوع الطلب:* ${pendingOrderData.customer.orderType}
+${generalNotes}---------------------------------
+📝 *تفاصيل الأصناف:*
+${itemsListText}---------------------------------
+💵 *مجموع المنتجات:* ${pendingOrderData.subtotal.toLocaleString()} ل.س
+${deliveryNoteText}💰 *الإجمالي النهائي:* *${pendingOrderData.total.toLocaleString()} ل.س*
+---------------------------------
+شكراً لاختياركم مطعم عالم الفواكه!`;
+
+            // 3. فتح الواتساب
+            window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
+
+            // 4. تفريغ السلة وإغلاق النافذة
             document.getElementById('confirm-modal').style.display = 'none';
+            cart = [];
+            pendingOrderData = null;
+            renderCart();
+            document.getElementById('checkout-form').reset();
+            alert('تم اعتماد طلبك وحفظه بنجاح وتحويلك إلى الواتساب!');
         }
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
+            e.preventDefault();
+            deferredPrompt = e;
             document.getElementById('pwa-install-banner').style.display = 'flex';
         });
 
@@ -722,7 +883,9 @@ ${deliveryNoteText}💰 *الإجمالي النهائي:* *${subtotal.toLocaleS
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') document.getElementById('pwa-install-banner').style.display = 'none';
+                if (outcome === 'accepted') {
+                    document.getElementById('pwa-install-banner').style.display = 'none';
+                }
                 deferredPrompt = null;
             }
         });
