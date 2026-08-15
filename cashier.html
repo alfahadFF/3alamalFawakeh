@@ -3,137 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة الكاشير والطباعة - عالم الفواكه</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <title>شاشة الكاشير والطلبات - عالم الفواكه</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --primary: #e50914;
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #ffffff;
-            --muted: #aaaaaa;
-            --border: #333333;
+            --primary-color: #e50914;
+            --primary-hover: #b80710;
+            --bg-color: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --border-color: #2e2e2e;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 20px 10px; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; }
 
-        header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--primary); }
-        h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; }
+        .cashier-header {
+            text-align: center; padding: 15px 0 20px;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .cashier-title { font-size: 1.8rem; font-weight: 900; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .cashier-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto 20px; }
-        .refresh-btn, .clear-btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .refresh-btn { background: var(--primary); color: white; }
-        .clear-btn { background: #333; color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .toolbar {
+            max-width: 900px; margin: 0 auto 20px;
+            display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 18px; border-radius: 8px; border: none; font-weight: 700;
+            font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: opacity 0.2s ease;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn-refresh { background-color: var(--primary-color); color: white; }
+        .btn-clear { background-color: #262626; color: #ff5252; border: 1px solid #444; }
 
-        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        
+        .orders-grid {
+            max-width: 900px; margin: 0 auto;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+
         .order-card {
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-            padding: 16px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .order-id { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
-        .order-type { background: var(--primary); color: white; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
-        
-        .cust-info { font-size: 0.9rem; line-height: 1.6; margin-bottom: 12px; color: #ddd; }
-        .cust-info span { font-weight: bold; color: #fff; }
-        
-        /* حقل الملاحظات المضاف */
-        .notes-box {
-            background: rgba(229, 9, 20, 0.15); border: 1px dashed var(--primary);
-            padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; color: #ffeb3b;
-            margin-bottom: 12px; font-weight: bold;
+            background-color: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color);
+            padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; gap: 12px;
         }
 
-        .items-list { border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); padding: 10px 0; margin-bottom: 12px; }
-        .item-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; }
+        .order-head {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;
+        }
+        .order-id { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); }
+        .order-badge {
+            background-color: var(--primary-color); color: #fff;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;
+        }
+        .order-time { font-size: 0.8rem; color: var(--text-muted); }
 
-        .order-total { font-size: 1.1rem; font-weight: 800; text-align: left; color: var(--primary); margin-bottom: 15px; }
+        .customer-info-box {
+            background-color: #121212; padding: 10px 14px; border-radius: 8px;
+            font-size: 0.88rem; line-height: 1.6; border: 1px solid #282828;
+        }
+        .cust-row { display: flex; gap: 8px; }
+        .cust-label { color: var(--text-muted); font-weight: 700; min-width: 65px; }
+
+        .items-list { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
+        .item-row {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            background: #202020; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
+        }
+        .item-note-badge {
+            display: inline-block; background: rgba(255, 183, 77, 0.15); color: #ffb74d;
+            font-size: 0.78rem; padding: 2px 6px; border-radius: 4px; margin-top: 3px; font-weight: 600;
+        }
+
+        .order-total-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 1.2rem; font-weight: 900; color: var(--primary-color);
+            padding-top: 8px; border-top: 1px solid var(--border-color);
+        }
 
         .print-btn {
-            width: 100%; background: #e50914; color: white; border: none; padding: 12px;
-            border-radius: 8px; font-size: 1rem; font-weight: 800; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background-color: var(--primary-color); color: #fff; border: none;
+            padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: 800;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .print-btn:hover { background-color: var(--primary-hover); }
 
-        /* تنسيقات الطابعة الحرارية (80mm) */
+        .empty-orders { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; }
+
+        /* ================================================= */
+        /* تصميم الفاتورة الحرارية للطباعة 80mm Print CSS */
+        /* ================================================= */
+        #printable-receipt { display: none; }
+
         @media print {
             body * { visibility: hidden; }
             #printable-receipt, #printable-receipt * { visibility: visible; }
             #printable-receipt {
-                position: absolute; left: 0; top: 0; width: 80mm; padding: 5mm;
-                font-family: 'Courier New', Courier, monospace; color: #000; background: #fff;
+                display: block !important;
+                position: absolute; left: 0; top: 0;
+                width: 78mm; max-width: 80mm;
+                margin: 0; padding: 6px;
+                color: #000 !important; background: #fff !important;
+                font-size: 12px; line-height: 1.35;
             }
-            .no-print { display: none !important; }
+
+            .p-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+            .p-logo { width: 55px; height: 55px; object-fit: contain; margin-bottom: 4px; }
+            .p-title { font-size: 17px; font-weight: 900; margin: 2px 0; }
+            .p-meta { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+            .p-phone { font-size: 12px; font-weight: bold; direction: ltr; display: inline-block; }
+
+            .p-order-box { border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px; }
+            .p-order-id { font-size: 16px; font-weight: 900; text-align: center; margin: 4px 0; }
+            .p-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; }
+
+            .p-cust-box { border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px; font-size: 11px; }
+
+            .p-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+            .p-table th { border-bottom: 1px solid #000; font-size: 11px; padding: 4px 0; text-align: right; }
+            .p-table td { padding: 4px 0; vertical-align: top; border-bottom: 1px dotted #ccc; font-size: 11px; }
+
+            .p-item-note { font-size: 10px; font-weight: bold; display: block; margin-top: 2px; padding-right: 5px; }
+
+            .p-total-box { border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 6px 0; margin: 6px 0; }
+            .p-total-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 900; }
+
+            .p-qr-box { text-align: center; margin-top: 8px; padding-top: 4px; }
+            .p-qr-img { width: 85px; height: 85px; object-fit: contain; margin: 0 auto; display: block; }
+            .p-qr-text { font-size: 10px; font-weight: bold; margin-top: 4px; }
+
+            .p-footer { text-align: center; font-size: 11px; font-weight: bold; margin-top: 8px; padding-top: 4px; }
         }
     </style>
 </head>
 <body>
 
-    <header class="no-print">
-        <h1><i class="fa-solid fa-cash-register"></i> شاشة الكاشير والطلبات</h1>
-        <p style="color: #888; font-size: 0.9rem;">عالم الفواكه - إدارية الوارد</p>
+    <header class="cashier-header">
+        <h1 class="cashier-title"><i class="fa-solid fa-cash-register"></i> شاشة الكاشير والطلبات</h1>
+        <p class="cashier-subtitle">مطعم عالم الفواكه - إدارة الوراد</p>
     </header>
 
-    <div class="toolbar no-print">
-        <button class="refresh-btn" onclick="loadOrders()"><i class="fa-solid fa-rotate"></i> تحديث الطلبات</button>
-        <button class="clear-btn" onclick="clearAllOrders()"><i class="fa-solid fa-trash"></i> مسح جميع الطلبات</button>
+    <div class="toolbar">
+        <button class="btn btn-refresh" onclick="loadOrders()"><i class="fa-solid fa-rotate"></i> تحديث الطلبات</button>
+        <button class="btn btn-clear" onclick="clearAllOrders()"><i class="fa-solid fa-trash-can"></i> مسح جميع الطلبات</button>
     </div>
 
-    <div class="orders-grid no-print" id="orders-container"></div>
+    <main class="orders-grid" id="orders-container"></main>
 
-    <!-- الإيصال المخصص للطباعة فقط -->
-    <div id="printable-receipt" style="display: none;"></div>
+    <!-- الهيكل الخاص بالطباعة الحرارية المعتمدة -->
+    <div id="printable-receipt"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', loadOrders);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+        });
 
         function loadOrders() {
             const container = document.getElementById('orders-container');
             const orders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
 
             if (orders.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">لا توجد طلبات واردة حتى الآن.</div>`;
+                container.innerHTML = `
+                    <div class="empty-orders">
+                        <i class="fa-solid fa-receipt fa-3x" style="margin-bottom:10px; opacity:0.4;"></i>
+                        <div>لا توجد طلبات واردة حالياً.</div>
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = orders.map((order, idx) => {
-                const cust = order.customer || {};
-                const notesHtml = cust.notes ? `<div class="notes-box">📌 <strong>ملاحظات:</strong> ${cust.notes}</div>` : '';
-
-                const itemsHtml = order.items.map(item => `
+            container.innerHTML = orders.map((ord, idx) => {
+                const itemsHtml = ord.items.map(it => `
                     <div class="item-row">
-                        <span><strong>${item.qty}x</strong> ${item.name} (${item.size})</span>
+                        <div>
+                            <strong>${it.name}</strong> (${it.size}) × ${it.qty}
+                            ${it.note ? `<br><span class="item-note-badge">👈 ${it.note}</span>` : ''}
+                        </div>
+                        <div><strong>${(it.unitPrice * it.qty).toLocaleString()} ل.س</strong></div>
                     </div>
                 `).join('');
 
                 return `
                     <div class="order-card">
-                        <div class="order-header">
-                            <span class="order-id">${order.id}</span>
-                            <span class="order-type">${cust.orderType || 'طلب'}</span>
-                        </div>
-                        <div style="font-size: 0.75rem; color: #888; margin-bottom: 8px; text-align: left;">
-                            <i class="fa-regular fa-clock"></i> ${order.date}
-                        </div>
-                        <div class="cust-info">
-                            <div>الزبون: <span>${cust.name || '-'}</span></div>
-                            <div>الهاتف: <span>${cust.phone || '-'}</span></div>
-                            <div>العنوان: <span>${cust.address || '-'}</span></div>
+                        <div class="order-head">
+                            <div>
+                                <span class="order-id">${ord.id}</span>
+                                <div class="order-time"><i class="fa-regular fa-clock"></i> ${ord.date}</div>
+                            </div>
+                            <span class="order-badge">${ord.customer.orderType}</span>
                         </div>
 
-                        ${notesHtml}
-
-                        <div class="items-list">
-                            ${itemsHtml}
+                        <div class="customer-info-box">
+                            <div class="cust-row"><span class="cust-label">الزبون:</span><strong>${ord.customer.name}</strong></div>
+                            <div class="cust-row"><span class="cust-label">الهاتف:</span><span>${ord.customer.phone}</span></div>
+                            <div class="cust-row"><span class="cust-label">العنوان:</span><span>${ord.customer.address}</span></div>
+                            ${ord.customer.notes ? `<div class="cust-row"><span class="cust-label">ملاحظات:</span><span style="color:#ffca28;">${ord.customer.notes}</span></div>` : ''}
                         </div>
 
-                        <div class="order-total">
-                            المجموع الكلي: ${order.total ? order.total.toLocaleString() : 0} ل.س
+                        <div class="items-list">${itemsHtml}</div>
+
+                        <div class="order-total-row">
+                            <span>المجموع الكلي:</span>
+                            <span>${(ord.total || ord.subtotal).toLocaleString()} ل.س</span>
                         </div>
 
                         <button class="print-btn" onclick="printReceipt(${idx})">
@@ -144,72 +222,83 @@
             }).join('');
         }
 
-        function printReceipt(index) {
+        function printReceipt(orderIndex) {
             const orders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
-            const order = orders[index];
-            if (!order) return;
+            const ord = orders[orderIndex];
+            if (!ord) return;
 
-            const cust = order.customer || {};
-            const receiptEl = document.getElementById('printable-receipt');
+            let itemsTableRows = '';
+            ord.items.forEach(it => {
+                const total = it.unitPrice * it.qty;
+                itemsTableRows += `
+                    <tr>
+                        <td>
+                            <strong>${it.name}</strong> (${it.size})
+                            ${it.note ? `<span class="p-item-note">👈 ملاحظة: ${it.note}</span>` : ''}
+                        </td>
+                        <td style="text-align:center;">${it.qty}</td>
+                        <td style="text-align:left;">${total.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
 
-            const itemsRows = order.items.map(item => `
-                <tr>
-                    <td style="padding: 3px 0;">${item.name} (${item.size})</td>
-                    <td style="text-align: center;">${item.qty}</td>
-                    <td style="text-align: left;">${(item.unitPrice * item.qty).toLocaleString()}</td>
-                </tr>
-            `).join('');
-
-            const notesSection = cust.notes ? `
-                <div style="margin-top: 5px; padding: 4px; border: 1px dashed #000; font-size: 11px;">
-                    <b>ملاحظات:</b> ${cust.notes}
-                </div>
-            ` : '';
-
-            receiptEl.innerHTML = `
-                <div style="text-align: center; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 5px;">
-                    <h2 style="font-size: 16px; margin: 0;">عالم الفواكه</h2>
-                    <p style="font-size: 11px; margin: 2px 0;">فاتورة طلب - ${cust.orderType}</p>
-                    <p style="font-size: 10px; margin: 0;">${order.date}</p>
-                    <p style="font-size: 12px; font-weight: bold; margin-top: 3px;">رقم الطلب: ${order.id}</p>
-                </div>
-
-                <div style="font-size: 11px; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
-                    <div><b>الاسم:</b> ${cust.name}</div>
-                    <div><b>الهاتف:</b> ${cust.phone}</div>
-                    <div><b>العنوان:</b> ${cust.address}</div>
-                    ${notesSection}
+            const receiptContainer = document.getElementById('printable-receipt');
+            receiptContainer.innerHTML = `
+                <div class="p-header">
+                    <img src="/logo.png" class="p-logo" alt="لوغو المطعم" onerror="this.style.display='none'">
+                    <div class="p-title">مطعم عالم الفواكه</div>
+                    <div class="p-meta">بإدارة: قسيم الحريري</div>
+                    <div class="p-meta">هاتف: <span class="p-phone">0938174782</span></div>
+                    <div style="font-size:11px; margin-top:2px;">فاتورة طلب - ${ord.customer.orderType}</div>
                 </div>
 
-                <table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 5px;">
+                <div class="p-order-box">
+                    <div class="p-order-id">رقم الطلب: ${ord.id}</div>
+                    <div class="p-row"><span>التاريخ:</span><span>${ord.date}</span></div>
+                </div>
+
+                <div class="p-cust-box">
+                    <div class="p-row"><span>الاسم:</span><strong>${ord.customer.name}</strong></div>
+                    <div class="p-row"><span>الهاتف:</span><span>${ord.customer.phone}</span></div>
+                    <div class="p-row"><span>العنوان:</span><span>${ord.customer.address}</span></div>
+                    ${ord.customer.notes ? `<div class="p-row" style="margin-top:2px;"><span>ملاحظة عامة:</span><span>${ord.customer.notes}</span></div>` : ''}
+                </div>
+
+                <table class="p-table">
                     <thead>
-                        <tr style="border-bottom: 1px solid #000;">
-                            <th style="text-align: right;">الصنف</th>
-                            <th style="text-align: center;">العدد</th>
-                            <th style="text-align: left;">السعر</th>
+                        <tr>
+                            <th style="width:55%;">الصنف</th>
+                            <th style="width:15%; text-align:center;">العدد</th>
+                            <th style="width:30%; text-align:left;">السعر</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${itemsRows}
+                        ${itemsTableRows}
                     </tbody>
                 </table>
 
-                <div style="border-top: 1px solid #000; padding-top: 5px; font-size: 12px; font-weight: bold; text-align: left;">
-                    الإجمالي: ${order.total ? order.total.toLocaleString() : 0} ل.س
+                <div class="p-total-box">
+                    <div class="p-total-row">
+                        <span>الإجمالي:</span>
+                        <span>${(ord.total || ord.subtotal).toLocaleString()} ل.س</span>
+                    </div>
                 </div>
 
-                <div style="text-align: center; margin-top: 10px; font-size: 10px; border-top: 1px dashed #000; padding-top: 5px;">
-                    شكراً لطلبكم من عالم الفواكه!
+                <div class="p-qr-box">
+                    <img src="/qr-code.png" class="p-qr-img" alt="QR Code" onerror="this.style.display='none'">
+                    <div class="p-qr-text">امسح الكود لتصفح المينيو والطلب من جديد 📲</div>
+                </div>
+
+                <div class="p-footer">
+                    شكراً لزيارتكم مطعم عالم الفواكه!
                 </div>
             `;
 
-            receiptEl.style.display = 'block';
             window.print();
-            receiptEl.style.display = 'none';
         }
 
         function clearAllOrders() {
-            if (confirm('هل أنت تأكد من مسح جميع الطلبات من الشاشة؟')) {
+            if (confirm('هل أنت متأكد من مسح جميع الطلبات من سجل الكاشير؟')) {
                 localStorage.removeItem('cashier_orders');
                 loadOrders();
             }
