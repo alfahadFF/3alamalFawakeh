@@ -13,6 +13,8 @@
         :root {
             --primary-color: #e50914;
             --primary-hover: #b80710;
+            --success-color: #25d366;
+            --success-hover: #1eb956;
             --bg-color: #0f0f0f;
             --card-bg: #1a1a1a;
             --border-color: #2e2e2e;
@@ -26,20 +28,20 @@
         .cashier-header {
             text-align: center; padding: 15px 0 20px;
             border-bottom: 2px solid var(--primary-color);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .cashier-title { font-size: 1.8rem; font-weight: 900; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 10px; }
         .cashier-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
 
         .toolbar {
-            max-width: 900px; margin: 0 auto 20px;
-            display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+            max-width: 900px; margin: 0 auto 15px;
+            display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center;
         }
         .toolbar-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
         .btn {
-            padding: 10px 16px; border-radius: 8px; border: none; font-weight: 700;
-            font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 15px; border-radius: 8px; border: none; font-weight: 700;
+            font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
             transition: all 0.2s ease;
         }
         .btn:active { opacity: 0.8; }
@@ -47,6 +49,26 @@
         .btn-auth { background-color: #262626; color: #ffca28; border: 1px solid #444; }
         .btn-sound { background-color: #1e3a1e; color: #4caf50; border: 1px solid #2e7d32; }
         .btn-sound.muted { background-color: #332020; color: #ff5252; border: 1px solid #5c2525; }
+
+        /* تبويبات التصفية (نشط / أرشيف / الكل) */
+        .filter-tabs {
+            max-width: 900px; margin: 0 auto 15px;
+            display: flex; gap: 8px; background: #1a1a1a; padding: 6px; border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1; padding: 10px; border: none; border-radius: 8px;
+            background: transparent; color: var(--text-muted); font-weight: 800;
+            font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab-btn.active {
+            background: var(--primary-color); color: white;
+            box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+        }
+        .tab-badge {
+            background: rgba(0,0,0,0.3); padding: 2px 7px; border-radius: 10px; font-size: 0.75rem;
+        }
 
         .orders-grid {
             max-width: 900px; margin: 0 auto;
@@ -60,6 +82,12 @@
             animation: fadeIn 0.4s ease;
         }
 
+        .order-card.archived {
+            opacity: 0.75;
+            border-color: #333;
+            background-color: #151515;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
@@ -70,10 +98,18 @@
             border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;
         }
         .order-id { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); }
+        
+        .badges-wrap { display: flex; gap: 6px; align-items: center; }
         .order-badge {
-            background-color: var(--primary-color); color: #fff;
-            padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;
+            background-color: #333; color: #fff;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: bold;
         }
+        .status-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 800;
+        }
+        .status-badge.new { background-color: #e50914; color: #fff; }
+        .status-badge.done { background-color: #25d366; color: #000; }
+
         .order-time { font-size: 0.8rem; color: var(--text-muted); }
 
         .customer-info-box {
@@ -99,12 +135,22 @@
             padding-top: 8px; border-top: 1px solid var(--border-color);
         }
 
-        .print-btn {
-            background-color: var(--primary-color); color: #fff; border: none;
-            padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: 800;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        .card-actions {
+            display: flex; gap: 8px; margin-top: 4px;
         }
-        .print-btn:hover { background-color: var(--primary-hover); }
+        .btn-action {
+            flex: 1; padding: 12px; border-radius: 8px; font-size: 0.92rem; font-weight: 800;
+            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-print { background-color: var(--primary-color); color: #fff; }
+        .btn-print:hover { background-color: var(--primary-hover); }
+
+        .btn-complete { background-color: var(--success-color); color: #000; }
+        .btn-complete:hover { background-color: var(--success-hover); }
+
+        .btn-restore { background-color: #333; color: #ffca28; border: 1px solid #555; }
+        .btn-restore:hover { background-color: #444; }
 
         .state-box { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; }
 
@@ -158,7 +204,7 @@
 
     <header class="cashier-header">
         <h1 class="cashier-title"><i class="fa-solid fa-cash-register"></i> شاشة الكاشير والطلبات</h1>
-        <p class="cashier-subtitle">مطعم عالم الفواكه - إدارة الوارد المباشر</p>
+        <p class="cashier-subtitle">مطعم عالم الفواكه - إدارة الوارد المباشر والأرشفة</p>
     </header>
 
     <div class="toolbar">
@@ -169,6 +215,22 @@
         <div class="toolbar-group">
             <button class="btn btn-auth" onclick="resetPin()"><i class="fa-solid fa-key"></i> تغيير رمز PIN</button>
         </div>
+    </div>
+
+    <!-- أزرار التصفية بين النشط والأرشيف -->
+    <div class="filter-tabs">
+        <button class="tab-btn active" id="tab-active" onclick="switchTab('active')">
+            <i class="fa-solid fa-bell-concierge"></i> الطلبات النشطة
+            <span class="tab-badge" id="badge-active">0</span>
+        </button>
+        <button class="tab-btn" id="tab-archived" onclick="switchTab('archived')">
+            <i class="fa-solid fa-box-archive"></i> الأرشيف (المنجزة)
+            <span class="tab-badge" id="badge-archived">0</span>
+        </button>
+        <button class="tab-btn" id="tab-all" onclick="switchTab('all')">
+            <i class="fa-solid fa-list"></i> الكل
+            <span class="tab-badge" id="badge-all">0</span>
+        </button>
     </div>
 
     <main class="orders-grid" id="orders-container"></main>
@@ -182,8 +244,9 @@
         let isFirstLoad = true;
         let soundEnabled = true;
         let autoPollingInterval = null;
+        let currentTab = 'active'; // 'active', 'archived', 'all'
 
-        // دالة توليد صوت الرنين (Ding-Dong) برمجياً عبر Web Audio API
+        // دالة توليد صوت التنبيه (Ding-Dong)
         function playChimeSound() {
             if (!soundEnabled) return;
             try {
@@ -204,7 +267,6 @@
                     osc.stop(ctx.currentTime + start + duration);
                 };
 
-                // نغمتين متتاليتين مثل جرس المطاعم (Ding-Dong)
                 playTone(587.33, 0, 0.4);      // D5
                 playTone(880.00, 0.18, 0.7);   // A5
             } catch (e) {
@@ -218,7 +280,7 @@
             if (soundEnabled) {
                 btn.className = 'btn btn-sound';
                 btn.innerHTML = '<i class="fa-solid fa-bell"></i> التنبيه: مفعّل';
-                playChimeSound(); // تجربة الصوت للتأكيد
+                playChimeSound();
             } else {
                 btn.className = 'btn btn-sound muted';
                 btn.innerHTML = '<i class="fa-solid fa-bell-slash"></i> التنبيه: مكتوم';
@@ -228,10 +290,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadOrders(false);
 
-            // بدء المراقبة التلقائية كل 15 ثانية
             if (autoPollingInterval) clearInterval(autoPollingInterval);
             autoPollingInterval = setInterval(() => {
-                loadOrders(true); // جلب في الخلفية (Silent Polling)
+                loadOrders(true);
             }, 15000);
         });
 
@@ -254,6 +315,13 @@
                 isFirstLoad = true;
                 loadOrders(false);
             }
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            renderOrdersList();
         }
 
         async function loadOrders(isBackground = false) {
@@ -305,36 +373,28 @@
 
                 if (!Array.isArray(fetchedOrders)) return;
 
-                // التحقق من وجود طلبات جديدة
+                // التنبيه الصوتي عند وصول طلب جديد وحالته "جديد"
                 if (!isFirstLoad) {
                     let hasBrandNewOrder = false;
                     fetchedOrders.forEach(ord => {
-                        if (ord.id && !knownOrderIds.has(ord.id)) {
+                        const status = (ord.status || 'جديد').trim();
+                        if (ord.id && !knownOrderIds.has(ord.id) && status === 'جديد') {
                             hasBrandNewOrder = true;
                         }
                     });
 
                     if (hasBrandNewOrder) {
-                        playChimeSound(); // تشغيل التنبيه الصوتي
+                        playChimeSound();
                     }
                 }
 
-                // تحديث الذاكرة بالطلبات الحالية
                 knownOrderIds.clear();
                 fetchedOrders.forEach(ord => { if (ord.id) knownOrderIds.add(ord.id); });
                 isFirstLoad = false;
                 liveOrders = fetchedOrders;
 
-                if (liveOrders.length === 0) {
-                    container.innerHTML = `
-                        <div class="state-box">
-                            <i class="fa-solid fa-receipt fa-3x" style="margin-bottom:10px; opacity:0.4;"></i>
-                            <div>لا توجد طلبات واردة حالياً.</div>
-                        </div>`;
-                    return;
-                }
-
-                renderOrdersList(liveOrders);
+                updateTabCounts();
+                renderOrdersList();
 
             } catch (error) {
                 console.error('Fetch orders failed:', error);
@@ -342,17 +402,46 @@
                     container.innerHTML = `
                         <div class="state-box">
                             <i class="fa-solid fa-circle-exclamation fa-3x" style="color:var(--primary-color); margin-bottom:10px;"></i>
-                            <div>فشل الاتصال بقاعدة البيانات. يرجى التحقق من الإنترنت وإعادة المحاولة.</div>
+                            <div>فشل الاتصال بقاعدة البيانات. يرجى التحقق من الإنترنت.</div>
                             <button class="btn btn-refresh" style="margin-top:15px;" onclick="loadOrders(false)">إعادة المحاولة</button>
                         </div>`;
                 }
             }
         }
 
-        function renderOrdersList(orders) {
+        function updateTabCounts() {
+            const activeCount = liveOrders.filter(o => (o.status || 'جديد') !== 'مكتمل' && (o.status || 'جديد') !== 'مؤرشف').length;
+            const archivedCount = liveOrders.filter(o => (o.status || 'جديد') === 'مكتمل' || (o.status || 'جديد') === 'مؤرشف').length;
+            
+            document.getElementById('badge-active').innerText = activeCount;
+            document.getElementById('badge-archived').innerText = archivedCount;
+            document.getElementById('badge-all').innerText = liveOrders.length;
+        }
+
+        function renderOrdersList() {
             const container = document.getElementById('orders-container');
 
-            container.innerHTML = orders.map((ord, idx) => {
+            let filtered = liveOrders;
+            if (currentTab === 'active') {
+                filtered = liveOrders.filter(o => (o.status || 'جديد') !== 'مكتمل' && (o.status || 'جديد') !== 'مؤرشف');
+            } else if (currentTab === 'archived') {
+                filtered = liveOrders.filter(o => (o.status || 'جديد') === 'مكتمل' || (o.status || 'جديد') === 'مؤرشف');
+            }
+
+            if (filtered.length === 0) {
+                const emptyMsg = currentTab === 'active' ? 'لا توجد طلبات نشطة حالياً.' : (currentTab === 'archived' ? 'الأرشيف فارغ حالياً.' : 'لا توجد أي طلبات مسجلة.');
+                container.innerHTML = `
+                    <div class="state-box">
+                        <i class="fa-solid fa-receipt fa-3x" style="margin-bottom:10px; opacity:0.4;"></i>
+                        <div>${emptyMsg}</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map((ord) => {
+                const isArchived = (ord.status === 'مكتمل' || ord.status === 'مؤرشف');
+                const originalIndex = liveOrders.findIndex(o => o.id === ord.id);
+
                 const itemsList = Array.isArray(ord.items) && ord.items.length > 0
                     ? ord.items.map(it => `
                         <div class="item-row">
@@ -368,13 +457,16 @@
                 const totalVal = ord.total || ord.subtotal || 0;
 
                 return `
-                    <div class="order-card">
+                    <div class="order-card ${isArchived ? 'archived' : ''}">
                         <div class="order-head">
                             <div>
                                 <span class="order-id">${ord.id}</span>
                                 <div class="order-time"><i class="fa-regular fa-clock"></i> ${ord.date}</div>
                             </div>
-                            <span class="order-badge">${ord.customer?.orderType || 'طلب جديد'}</span>
+                            <div class="badges-wrap">
+                                <span class="order-badge">${ord.customer?.orderType || 'طلب'}</span>
+                                <span class="status-badge ${isArchived ? 'done' : 'new'}">${ord.status || 'جديد'}</span>
+                            </div>
                         </div>
 
                         <div class="customer-info-box">
@@ -391,12 +483,62 @@
                             <span>${Number(totalVal).toLocaleString()} ل.س</span>
                         </div>
 
-                        <button class="print-btn" onclick="printReceipt(${idx})">
-                            <i class="fa-solid fa-print"></i> طباعة الفاتورة (80mm)
-                        </button>
+                        <div class="card-actions">
+                            <button class="btn-action btn-print" onclick="printReceipt(${originalIndex})">
+                                <i class="fa-solid fa-print"></i> طباعة (80mm)
+                            </button>
+                            
+                            ${!isArchived ? `
+                                <button class="btn-action btn-complete" onclick="updateOrderStatus('${ord.id}', 'مكتمل')">
+                                    <i class="fa-solid fa-check-double"></i> تم الإنجاز والأرشفة
+                                </button>
+                            ` : `
+                                <button class="btn-action btn-restore" onclick="updateOrderStatus('${ord.id}', 'جديد')">
+                                    <i class="fa-solid fa-rotate-left"></i> إعادة للنشط
+                                </button>
+                            `}
+                        </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        // دالة تحديث حالة الطلب السحابية
+        async function updateOrderStatus(orderId, newStatus) {
+            const pin = getOrPromptPin();
+            if (!pin) return;
+
+            // تحديث محلي سريع في الواجهة
+            const target = liveOrders.find(o => o.id === orderId);
+            if (target) {
+                target.status = newStatus;
+                updateTabCounts();
+                renderOrdersList();
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-cashier-pin': pin
+                    },
+                    body: JSON.stringify({
+                        action: 'update_status',
+                        id: orderId,
+                        status: newStatus
+                    })
+                });
+
+                if (response.status === 401) {
+                    alert('رمز PIN غير صحيح!');
+                    localStorage.removeItem('cashier_pin');
+                    loadOrders(false);
+                }
+            } catch (err) {
+                console.error('Failed to update status:', err);
+                alert('حدث خطأ أثناء تحديث الحالة في السيرفر.');
+            }
         }
 
         function printReceipt(orderIndex) {
