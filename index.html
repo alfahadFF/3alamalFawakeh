@@ -351,7 +351,8 @@
                             <option value="صالة">تناول في الصالة</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <!-- حقل العنوان (يظهر فقط في حال طلبات التوصيل) -->
+                    <div class="form-group" id="address-group">
                         <label for="cust-address">العنوان التفصيلي <span style="color:red">*</span></label>
                         <input type="text" id="cust-address" class="form-input" placeholder="الحي - الشارع - علامة مميزة" required>
                     </div>
@@ -368,7 +369,7 @@
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-card">
             
-            <!-- ترويسة الفاتورة الرسمية المطلوبة -->
+            <!-- ترويسة الفاتورة الرسمية -->
             <div class="receipt-official-header">
                 <div class="receipt-brand-meta">
                     <img src="/logo.png" alt="لوغو" class="receipt-logo-thumb" onerror="this.src='/icon-192.png'">
@@ -439,6 +440,7 @@
 
         document.addEventListener('DOMContentLoaded', () => { 
             fetchLiveMenu();
+            handleOrderTypeChange();
         });
 
         async function fetchLiveMenu() {
@@ -572,7 +574,6 @@
                                 </select>
                             </div>
 
-                            <!-- حقل ملاحظات الصنف -->
                             <div class="control-group">
                                 <input type="text" id="note-${prod.id}" class="item-note-input" placeholder="ملاحظة لهذا الصنف (مثال: بدون شطة، زيادة مايونيز)..." maxlength="80">
                             </div>
@@ -739,7 +740,29 @@
             document.getElementById('float-cart-count').innerText = totalCount;
         }
 
-        function handleOrderTypeChange() { renderCart(); }
+        // معالجة تغيير نوع الطلب وتحديث حالة حقل العنوان
+        function handleOrderTypeChange() {
+            const orderType = document.getElementById('order-type').value;
+            const addressGroup = document.getElementById('address-group');
+            const addressInput = document.getElementById('cust-address');
+
+            const isDelivery = orderType.includes('توصيل');
+
+            if (isDelivery) {
+                addressGroup.style.display = 'flex';
+                addressInput.setAttribute('required', 'true');
+                if (addressInput.value === 'سفري (استلام من المحل)' || addressInput.value === 'تناول في الصالة') {
+                    addressInput.value = '';
+                }
+            } else {
+                addressGroup.style.display = 'none';
+                addressInput.removeAttribute('required');
+                addressInput.value = orderType;
+            }
+
+            renderCart();
+        }
+
         function updateCartItemQty(index, delta) { 
             cart[index].qty += delta; 
             if (cart[index].qty <= 0) cart.splice(index, 1); 
@@ -758,9 +781,10 @@
 
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
-            const address = document.getElementById('cust-address').value.trim();
-            const notes = document.getElementById('cust-notes').value.trim();
             const orderType = document.getElementById('order-type').value;
+            const isDelivery = orderType.includes('توصيل');
+            const address = isDelivery ? document.getElementById('cust-address').value.trim() : orderType;
+            const notes = document.getElementById('cust-notes').value.trim();
 
             let subtotal = 0;
             let itemsHtml = '';
@@ -796,7 +820,7 @@
                 </div>
                 <div style="border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:8px;">
                     <div>👤 <strong>الزبون:</strong> ${name} | 📞 ${phone}</div>
-                    <div>📍 <strong>العنوان:</strong> ${address} (${orderType})</div>
+                    <div>📍 <strong>العنوان / النوع:</strong> ${address}</div>
                     ${notes ? `<div>📌 <strong>ملاحظات عامة:</strong> ${notes}</div>` : ''}
                 </div>
                 <div style="margin-bottom:8px;">
@@ -815,16 +839,33 @@
             document.getElementById('confirm-modal').style.display = 'none';
         }
 
-        // إرسال الطلب وحفظه للكاشير مع الترويسة المكتوبة
-        function processFinalOrder() {
+        // إرسال الطلب وحفظه عبر دالة Netlify السحابية ثم فتح الواتساب
+        async function processFinalOrder() {
             if (!pendingOrderData) return;
 
-            // 1. حفظ في سجل الكاشير
-            let existingOrders = JSON.parse(localStorage.getItem('cashier_orders') || '[]');
-            existingOrders.unshift(pendingOrderData);
-            localStorage.setItem('cashier_orders', JSON.stringify(existingOrders));
+            // 1. إرسال الطلب وحفظه عبر الدالة السحابية في Netlify
+            try {
+                const response = await fetch('/.netlify/functions/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: pendingOrderData.id,
+                        date: pendingOrderData.date,
+                        customer: pendingOrderData.customer,
+                        items: pendingOrderData.items,
+                        total: pendingOrderData.total
+                    })
+                });
 
-            // 2. تجميع نص الفاتورة للواتساب مع الترويسة
+                const result = await response.json();
+                if (response.status !== 200) {
+                    console.error("خطأ في الخادم أثناء حفظ الطلب:", result);
+                }
+            } catch (err) {
+                console.error('فشل الاتصال بالدالة السحابية:', err);
+            }
+
+            // 2. تجميع نص الفاتورة للواتساب مع الترويسة المعتمدة
             let itemsListText = '';
             pendingOrderData.items.forEach((item, idx) => {
                 const itemSubtotal = item.unitPrice * item.qty;
@@ -850,7 +891,7 @@
 📅 *التاريخ:* ${pendingOrderData.date}
 👤 *اسم الزبون:* ${pendingOrderData.customer.name}
 📞 *رقم الهاتف:* ${pendingOrderData.customer.phone}
-📍 *العنوان:* ${pendingOrderData.customer.address}
+📍 *العنوان / النوع:* ${pendingOrderData.customer.address}
 🛵 *نوع الطلب:* ${pendingOrderData.customer.orderType}
 ${generalNotes}---------------------------------
 📝 *تفاصيل الأصناف:*
@@ -869,6 +910,7 @@ ${deliveryNoteText}💰 *الإجمالي النهائي:* *${pendingOrderData.t
             pendingOrderData = null;
             renderCart();
             document.getElementById('checkout-form').reset();
+            handleOrderTypeChange();
             alert('تم اعتماد طلبك وحفظه بنجاح وتحويلك إلى الواتساب!');
         }
 
