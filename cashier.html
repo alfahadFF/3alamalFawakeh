@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شاشة الكاشير والطلبات - عالم الفواكه</title>
 
-    <!-- الخطوط والأيقونات -->
+    <!-- Google Fonts & Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- مكتبة QZ Tray للطباعة الصامتة والآلية -->
+    <!-- مكتبة QZ Tray للطباعة الصامتة المتزامنة -->
     <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.min.js"></script>
 
     <style>
@@ -58,7 +58,7 @@
         }
         .qz-status-badge.connected { color: #25d366; border-color: #2e7d32; background: #132a13; }
 
-        /* أزرار التصفية */
+        /* تبويبات التصفية */
         .filter-tabs {
             max-width: 900px; margin: 0 auto 15px;
             display: flex; gap: 8px; background: #1a1a1a; padding: 6px; border-radius: 12px;
@@ -140,9 +140,7 @@
             padding-top: 8px; border-top: 1px solid var(--border-color);
         }
 
-        .print-actions {
-            display: flex; gap: 10px;
-        }
+        .print-actions { display: flex; gap: 10px; }
         .print-btn {
             flex: 1; background-color: var(--primary-color); color: #fff; border: none;
             padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 800;
@@ -203,19 +201,19 @@
         }
 
         /* ========================================================= */
-        /* تنسيق الفاتورة الحرارية الدقيقة (72mm فقط ومنع الصفحة الفارغة) */
+        /* إعدادات الطباعة الدقيقة (عرض 79.1 مم مع هوامش 3.5 مم)        */
         /* ========================================================= */
         #printable-receipt { display: none; }
 
         @page {
-            size: 72mm auto;
-            margin: 0;
+            size: 79.1mm auto;
+            margin: 0mm !important;
         }
 
         @media print {
             html, body {
-                width: 72mm !important;
-                max-width: 72mm !important;
+                width: 79.1mm !important;
+                max-width: 79.1mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #fff !important;
@@ -229,22 +227,23 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 72mm !important;
-                max-width: 72mm !important;
+                width: 79.1mm !important;
+                max-width: 79.1mm !important;
                 margin: 0 !important;
-                padding: 4mm 2mm 0mm 2mm !important;
+                /* 7 مم هوامش موزعة 3.5 مم يميناً و 3.5 مم يساراً */
+                padding: 3mm 3.5mm 0mm 3.5mm !important;
                 color: #000 !important;
                 background: #fff !important;
                 font-family: 'Tajawal', sans-serif !important;
                 font-size: 11.5px;
                 line-height: 1.35;
-                box-sizing: border-box;
+                box-sizing: border-box !important;
                 page-break-after: avoid !important;
                 page-break-inside: avoid !important;
             }
 
             .p-header { text-align: center; border-bottom: 1.5px dashed #000; padding-bottom: 5px; margin-bottom: 5px; }
-            .p-logo { width: 60px; height: 60px; object-fit: contain; margin-bottom: 2px; filter: contrast(180%); }
+            .p-logo { width: 65px; height: 65px; object-fit: contain; margin-bottom: 2px; filter: contrast(180%); }
             .p-title { font-size: 15px; font-weight: 900; margin: 1px 0; }
             .p-meta { font-size: 11px; font-weight: bold; margin-bottom: 1px; }
             .p-phone { font-size: 11px; font-weight: bold; direction: ltr; display: inline-block; }
@@ -289,7 +288,6 @@
         </div>
     </div>
 
-    <!-- تبويبات التصفية -->
     <div class="filter-tabs">
         <button class="tab-btn active" id="tab-active" onclick="switchTab('active')">
             <i class="fa-solid fa-bell-concierge"></i> النشطة (آخر 3 ساعات)
@@ -307,7 +305,6 @@
 
     <main class="orders-grid" id="orders-container"></main>
 
-    <!-- نافذة الإشعار المنبثق -->
     <div class="pos-alert-overlay" id="pos-alert-modal">
         <div class="pos-alert-box">
             <div class="pos-alert-icon"><i class="fa-solid fa-bell"></i></div>
@@ -319,11 +316,9 @@
         </div>
     </div>
 
-    <!-- الهيكل الخاص بالطباعة -->
     <div id="printable-receipt"></div>
 
     <script>
-        // أسماء الطابعات المعتمدة في النظام
         const PRINTER_CASHIER = "RONGTA 80mm 2";
         const PRINTER_KITCHEN = "RONGTA 80mm Series Printer";
 
@@ -335,9 +330,37 @@
         let currentTab = 'active';
         let isQzConnected = false;
 
-        // ==========================================
-        // تهيئة والاتصال ببرنامج QZ Tray
-        // ==========================================
+        // متغيرات حفظ الصور بصيغة Base64 لطباعة فورية بدون أي تأخير
+        let cachedLogoBase64 = '';
+        let cachedQrBase64 = '';
+
+        // دالة تحميل وتحويل الصور مسبقاً إلى Base64 عند فتح الصفحة
+        async function preloadImageToBase64(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return '';
+                const blob = await response.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = () => resolve('');
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                console.warn('Preload failed for:', url, err);
+                return '';
+            }
+        }
+
+        async function initImageCache() {
+            cachedLogoBase64 = await preloadImageToBase64('/Black-logo.png');
+            if (!cachedLogoBase64) cachedLogoBase64 = await preloadImageToBase64('/Black-logo.svg');
+            if (!cachedLogoBase64) cachedLogoBase64 = await preloadImageToBase64('/logo.png');
+
+            cachedQrBase64 = await preloadImageToBase64('/qr-code.png');
+        }
+
+        // تهيئة الاتصال بـ QZ Tray
         async function connectQZ() {
             const statusEl = document.getElementById('qz-status');
             try {
@@ -350,14 +373,11 @@
             } catch (err) {
                 isQzConnected = false;
                 statusEl.className = 'qz-status-badge';
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#ffca28;"></i> QZ Tray غير مشغل';
-                console.warn('QZ Tray connection failed:', err);
+                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#ffca28;"></i> QZ Tray غير متصل';
             }
         }
 
-        // ==========================================
-        // توليد كود HTML الفاتورة بمقاس 72mm معزول
-        // ==========================================
+        // توليد كود HTML الفاتورة مع تثبيت الهوامش وعرض 79.1 مم والصور الفورية
         function generateReceiptHtml(ord) {
             let itemsTableRows = '';
             if (Array.isArray(ord.items) && ord.items.length > 0) {
@@ -379,11 +399,13 @@
             }
 
             const totalVal = Number(ord.total || ord.subtotal || 0);
+            const logoSrc = cachedLogoBase64 || `${window.location.origin}/Black-logo.png`;
+            const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
 
             return `
-                <div style="width:72mm; max-width:72mm; margin:0; padding:2mm; box-sizing:border-box; font-family:'Tajawal', sans-serif; font-size:11.5px; line-height:1.35; color:#000; direction:rtl; text-align:right;">
+                <div style="width:79.1mm; max-width:79.1mm; margin:0; padding:3mm 3.5mm 0mm 3.5mm; box-sizing:border-box; font-family:'Tajawal', sans-serif; font-size:11.5px; line-height:1.35; color:#000; direction:rtl; text-align:right;">
                     <div style="text-align:center; border-bottom:1.5px dashed #000; padding-bottom:5px; margin-bottom:5px;">
-                        <img src="${window.location.origin}/Black-logo.png" style="width:60px; height:60px; object-fit:contain; filter:contrast(180%); margin-bottom:2px;" onerror="this.style.display='none'">
+                        <img src="${logoSrc}" style="width:65px; height:65px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
                         <div style="font-size:15px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
                         <div style="font-size:11px; font-weight:bold;">بإدارة: قسيم الحريري</div>
                         <div style="font-size:11px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0938174782</span></div>
@@ -421,7 +443,7 @@
                     </div>
 
                     <div style="text-align:center; margin-top:5px;">
-                        <img src="${window.location.origin}/qr-code.png" style="width:65px; height:65px; margin:0 auto; display:block;" onerror="this.style.display='none'">
+                        <img src="${qrSrc}" style="width:70px; height:70px; margin:0 auto; display:block;" alt="QR">
                         <div style="font-size:9px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
                     </div>
 
@@ -432,19 +454,17 @@
             `;
         }
 
-        // ========================================================
-        // دالة الطباعة الصامتة المزدوجة التلقائية عبر QZ Tray
-        // ==========================================
+        // الطباعة الصامتة المزدوجة التلقائية عبر QZ Tray
         async function silentPrintBothPrinters(order) {
             const receiptHtml = generateReceiptHtml(order);
 
             if (isQzConnected && qz.websocket.isActive()) {
                 try {
                     const printOptions = {
-                        size: { width: 72 },
+                        size: { width: 79.1 },
                         units: 'mm',
                         margins: { top: 0, right: 0, bottom: 0, left: 0 },
-                        rasterize: true, // يضمن وضوح الخطوط العربية وتطابقها
+                        rasterize: true,
                         scaleContent: false
                     };
 
@@ -455,35 +475,24 @@
                         data: receiptHtml
                     }];
 
-                    // 1. إرسال لطابعة الكاشير
                     const configCashier = qz.configs.create(PRINTER_CASHIER, printOptions);
                     await qz.print(configCashier, printData);
 
-                    // 2. إرسال لطابعة المطبخ
                     const configKitchen = qz.configs.create(PRINTER_KITCHEN, printOptions);
                     await qz.print(configKitchen, printData);
 
-                    console.log(`Auto-printed order #${order.id} on both printers successfully.`);
                     return;
                 } catch (qzErr) {
-                    console.error("QZ Auto print failed, falling back to browser window.print:", qzErr);
+                    console.error("QZ print failed:", qzErr);
                 }
             }
 
-            // في حال عدم عمل QZ Tray لأي سبب، الرجوع للطباعة عبر المتصفح
-            fallbackBrowserPrint(order);
-        }
-
-        // طباعة يدوية للمتصفح كبديل احتياطي
-        function fallbackBrowserPrint(order) {
+            // خيار احتياطي في حال عدم تشغيل QZ Tray
             const container = document.getElementById('printable-receipt');
-            container.innerHTML = generateReceiptHtml(order);
+            container.innerHTML = receiptHtml;
             window.print();
         }
 
-        // ==========================================
-        // خوارزمية فحص وحساب وقت الطلب (3 ساعات)
-        // ==========================================
         function isOrderOlderThan3Hours(order) {
             if (!order || !order.date) return false;
             try {
@@ -522,9 +531,6 @@
             }
         }
 
-        // ==========================================
-        // التنبيهات الصوتية والمرئية
-        // ==========================================
         function playChimeSound() {
             if (!soundEnabled) return;
             try {
@@ -581,10 +587,8 @@
             }
         }
 
-        // ==========================================
-        // جلب الطلبات وإدارة واجهة المستخدم
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initImageCache();
             connectQZ();
             loadOrders(false);
 
@@ -665,7 +669,6 @@
                 const fetchedOrders = await response.json();
                 if (!Array.isArray(fetchedOrders)) return;
 
-                // التحقق من وصول طلبات جديدة لتشغيل الصوت والطباعة الآلية فوراً
                 if (!isFirstLoad) {
                     let latestNewOrder = null;
                     fetchedOrders.forEach(ord => {
@@ -675,9 +678,9 @@
                     });
 
                     if (latestNewOrder) {
-                        playChimeSound();                   // 1. صوت التنبيه
-                        showVisualAlert(latestNewOrder);     // 2. إشعار الشاشة
-                        silentPrintBothPrinters(latestNewOrder); // 3. طباعة آلية فورية على الطابعتين
+                        playChimeSound();
+                        showVisualAlert(latestNewOrder);
+                        silentPrintBothPrinters(latestNewOrder);
                     }
                 }
 
