@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شاشة الكاشير والطلبات - عالم الفواكه</title>
 
-    <!-- Google Fonts & Font Awesome -->
+    <!-- الخطوط والأيقونات -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- مكتبة QZ Tray للطباعة الصامتة المتزامنة -->
+    <!-- مكتبة QZ Tray للطباعة الصامتة -->
     <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.min.js"></script>
 
     <style>
@@ -151,7 +151,7 @@
 
         .state-box { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; }
 
-        /* نافذة الإشعار المنبثق لشاشات اللمس */
+        /* نافذة الإشعار المنبثق */
         .pos-alert-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
@@ -201,7 +201,7 @@
         }
 
         /* ========================================================= */
-        /* إعدادات الطباعة الدقيقة (عرض 79.1 مم مع هوامش 3.5 مم)        */
+        /* قواعد الطباعة الصارمة: صفحة واحدة فقط وحذف كامل للمساحات */
         /* ========================================================= */
         #printable-receipt { display: none; }
 
@@ -211,27 +211,33 @@
         }
 
         @media print {
+            /* حذف جميع عناصر الصفحة من الـ DOM أثناء الطباعة حتى لا تولد صفحات فارغة */
+            .cashier-header,
+            .toolbar,
+            .filter-tabs,
+            .orders-grid,
+            .pos-alert-overlay {
+                display: none !important;
+            }
+
             html, body {
                 width: 79.1mm !important;
                 max-width: 79.1mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #fff !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
             }
-
-            body * { visibility: hidden; }
-            #printable-receipt, #printable-receipt * { visibility: visible; }
 
             #printable-receipt {
                 display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
+                position: static !important;
                 width: 79.1mm !important;
                 max-width: 79.1mm !important;
-                margin: 0 !important;
-                /* 7 مم هوامش موزعة 3.5 مم يميناً و 3.5 مم يساراً */
-                padding: 3mm 3.5mm 0mm 3.5mm !important;
+                margin: 0 auto !important;
+                padding: 2mm 3.5mm 0mm 3.5mm !important;
                 color: #000 !important;
                 background: #fff !important;
                 font-family: 'Tajawal', sans-serif !important;
@@ -240,10 +246,11 @@
                 box-sizing: border-box !important;
                 page-break-after: avoid !important;
                 page-break-inside: avoid !important;
+                page-break-before: avoid !important;
             }
 
-            .p-header { text-align: center; border-bottom: 1.5px dashed #000; padding-bottom: 5px; margin-bottom: 5px; }
-            .p-logo { width: 65px; height: 65px; object-fit: contain; margin-bottom: 2px; filter: contrast(180%); }
+            .p-header { text-align: center; border-bottom: 1.5px dashed #000; padding-bottom: 4px; margin-bottom: 4px; }
+            .p-logo { width: 65px; height: 65px; object-fit: contain; margin: 0 auto 2px; display: block; filter: contrast(180%); }
             .p-title { font-size: 15px; font-weight: 900; margin: 1px 0; }
             .p-meta { font-size: 11px; font-weight: bold; margin-bottom: 1px; }
             .p-phone { font-size: 11px; font-weight: bold; direction: ltr; display: inline-block; }
@@ -262,11 +269,11 @@
             .p-total-box { border-top: 1.5px dashed #000; border-bottom: 1.5px dashed #000; padding: 4px 0; margin: 4px 0; }
             .p-total-row { display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 900; }
             
-            .p-qr-box { text-align: center; margin-top: 5px; padding-top: 2px; }
-            .p-qr-img { width: 70px; height: 70px; object-fit: contain; margin: 0 auto; display: block; }
+            .p-qr-box { text-align: center; margin-top: 4px; padding-top: 2px; }
+            .p-qr-img { width: 68px; height: 68px; object-fit: contain; margin: 0 auto; display: block; }
             .p-qr-text { font-size: 9px; font-weight: bold; margin-top: 2px; }
             
-            .p-footer { text-align: center; font-size: 10px; font-weight: bold; margin-top: 5px; padding-bottom: 2mm; }
+            .p-footer { text-align: center; font-size: 10px; font-weight: bold; margin-top: 4px; padding-bottom: 1mm; }
         }
     </style>
 </head>
@@ -330,11 +337,9 @@
         let currentTab = 'active';
         let isQzConnected = false;
 
-        // متغيرات حفظ الصور بصيغة Base64 لطباعة فورية بدون أي تأخير
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // دالة تحميل وتحويل الصور مسبقاً إلى Base64 عند فتح الصفحة
         async function preloadImageToBase64(url) {
             try {
                 const response = await fetch(url);
@@ -347,7 +352,6 @@
                     reader.readAsDataURL(blob);
                 });
             } catch (err) {
-                console.warn('Preload failed for:', url, err);
                 return '';
             }
         }
@@ -360,7 +364,6 @@
             cachedQrBase64 = await preloadImageToBase64('/qr-code.png');
         }
 
-        // تهيئة الاتصال بـ QZ Tray
         async function connectQZ() {
             const statusEl = document.getElementById('qz-status');
             try {
@@ -377,7 +380,6 @@
             }
         }
 
-        // توليد كود HTML الفاتورة مع تثبيت الهوامش وعرض 79.1 مم والصور الفورية
         function generateReceiptHtml(ord) {
             let itemsTableRows = '';
             if (Array.isArray(ord.items) && ord.items.length > 0) {
@@ -403,28 +405,28 @@
             const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
 
             return `
-                <div style="width:79.1mm; max-width:79.1mm; margin:0; padding:3mm 3.5mm 0mm 3.5mm; box-sizing:border-box; font-family:'Tajawal', sans-serif; font-size:11.5px; line-height:1.35; color:#000; direction:rtl; text-align:right;">
-                    <div style="text-align:center; border-bottom:1.5px dashed #000; padding-bottom:5px; margin-bottom:5px;">
-                        <img src="${logoSrc}" style="width:65px; height:65px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
-                        <div style="font-size:15px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
-                        <div style="font-size:11px; font-weight:bold;">بإدارة: قسيم الحريري</div>
-                        <div style="font-size:11px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0938174782</span></div>
+                <div style="width:79.1mm; max-width:79.1mm; margin:0; padding:2mm 3.5mm 0mm 3.5mm; box-sizing:border-box; font-family:'Tajawal', sans-serif; font-size:11.5px; line-height:1.35; color:#000; direction:rtl; text-align:right;">
+                    <div class="p-header" style="text-align:center; border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:4px;">
+                        <img src="${logoSrc}" class="p-logo" style="width:65px; height:65px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
+                        <div class="p-title" style="font-size:15px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
+                        <div class="p-meta" style="font-size:11px; font-weight:bold;">بإدارة: قسيم الحريري</div>
+                        <div class="p-meta" style="font-size:11px; font-weight:bold;">هاتف: <span class="p-phone" style="direction:ltr; display:inline-block;">0938174782</span></div>
                         <div style="font-size:10.5px; margin-top:2px; font-weight:bold;">فاتورة طلب - ${ord.customer?.orderType || ''}</div>
                     </div>
 
-                    <div style="border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:4px;">
-                        <div style="font-size:14px; font-weight:900; text-align:center; margin:2px 0;">رقم الطلب: ${ord.id}</div>
-                        <div style="display:flex; justify-content:space-between; font-size:10.5px;"><span>التاريخ:</span><span>${ord.date || ''}</span></div>
+                    <div class="p-order-box" style="border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:4px;">
+                        <div class="p-order-id" style="font-size:14px; font-weight:900; text-align:center; margin:2px 0;">رقم الطلب: ${ord.id}</div>
+                        <div class="p-row" style="display:flex; justify-content:space-between; font-size:10.5px;"><span>التاريخ:</span><span>${ord.date || ''}</span></div>
                     </div>
 
-                    <div style="border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:4px; font-size:10.5px;">
-                        <div style="display:flex; justify-content:space-between;"><span>الاسم:</span><strong>${ord.customer?.name || '---'}</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>الهاتف:</span><span>${ord.customer?.phone || '---'}</span></div>
-                        <div style="display:flex; justify-content:space-between;"><span>العنوان:</span><span>${ord.customer?.address || '---'}</span></div>
-                        ${ord.customer?.notes ? `<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>ملاحظة:</span><span>${ord.customer.notes}</span></div>` : ''}
+                    <div class="p-cust-box" style="border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:4px; font-size:10.5px;">
+                        <div class="p-row" style="display:flex; justify-content:space-between;"><span>الاسم:</span><strong>${ord.customer?.name || '---'}</strong></div>
+                        <div class="p-row" style="display:flex; justify-content:space-between;"><span>الهاتف:</span><span>${ord.customer?.phone || '---'}</span></div>
+                        <div class="p-row" style="display:flex; justify-content:space-between;"><span>العنوان:</span><span>${ord.customer?.address || '---'}</span></div>
+                        ${ord.customer?.notes ? `<div class="p-row" style="display:flex; justify-content:space-between; margin-top:2px;"><span>ملاحظة:</span><span>${ord.customer.notes}</span></div>` : ''}
                     </div>
 
-                    <table style="width:100%; border-collapse:collapse; margin:4px 0;">
+                    <table class="p-table" style="width:100%; border-collapse:collapse; margin:4px 0;">
                         <thead>
                             <tr>
                                 <th style="width:55%; border-bottom:1px solid #000; font-size:10.5px; padding:2px 0; text-align:right;">الصنف</th>
@@ -435,26 +437,25 @@
                         <tbody>${itemsTableRows}</tbody>
                     </table>
 
-                    <div style="border-top:1.5px dashed #000; border-bottom:1.5px dashed #000; padding:4px 0; margin:4px 0;">
-                        <div style="display:flex; justify-content:space-between; font-size:13.5px; font-weight:900;">
+                    <div class="p-total-box" style="border-top:1.5px dashed #000; border-bottom:1.5px dashed #000; padding:4px 0; margin:4px 0;">
+                        <div class="p-total-row" style="display:flex; justify-content:space-between; font-size:13.5px; font-weight:900;">
                             <span>الإجمالي:</span>
                             <span>${totalVal.toLocaleString()} ل.س</span>
                         </div>
                     </div>
 
-                    <div style="text-align:center; margin-top:5px;">
-                        <img src="${qrSrc}" style="width:70px; height:70px; margin:0 auto; display:block;" alt="QR">
-                        <div style="font-size:9px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
+                    <div class="p-qr-box" style="text-align:center; margin-top:4px;">
+                        <img src="${qrSrc}" class="p-qr-img" style="width:68px; height:68px; margin:0 auto; display:block;" alt="QR">
+                        <div class="p-qr-text" style="font-size:9px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
                     </div>
 
-                    <div style="text-align:center; font-size:10px; font-weight:bold; margin-top:5px; padding-bottom:2mm;">
+                    <div class="p-footer" style="text-align:center; font-size:10px; font-weight:bold; margin-top:4px; padding-bottom:1mm;">
                         شكراً لزيارتكم مطعم عالم الفواكه!
                     </div>
                 </div>
             `;
         }
 
-        // الطباعة الصامتة المزدوجة التلقائية عبر QZ Tray
         async function silentPrintBothPrinters(order) {
             const receiptHtml = generateReceiptHtml(order);
 
@@ -487,7 +488,7 @@
                 }
             }
 
-            // خيار احتياطي في حال عدم تشغيل QZ Tray
+            // طباعة المتصفح (احتياطية)
             const container = document.getElementById('printable-receipt');
             container.innerHTML = receiptHtml;
             window.print();
