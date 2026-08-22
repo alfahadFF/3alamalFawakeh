@@ -9,8 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- مكتبة QZ Tray ومكتبة التوقيع الرقمي لحل مشكلة زر السماح -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.9.0/jsrsasign-all-min.js"></script>
+    <!-- مكتبة QZ Tray للطباعة الصامتة -->
     <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.6/qz-tray.min.js"></script>
 
     <style>
@@ -103,7 +102,7 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;
         }
-        .order-id { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); }
+        .order-id { font-size: 1.4rem; font-weight: 900; color: var(--primary-color); }
         
         .badges-wrap { display: flex; gap: 6px; align-items: center; }
         .order-badge {
@@ -119,11 +118,11 @@
         .order-time { font-size: 0.8rem; color: var(--text-muted); }
 
         .customer-info-box {
-            background-color: #121212; padding: 10px 14px; border-radius: 8px;
-            font-size: 0.88rem; line-height: 1.6; border: 1px solid #282828;
+            background-color: #121212; padding: 12px 14px; border-radius: 8px;
+            font-size: 0.95rem; line-height: 1.6; border: 1px solid #282828;
         }
-        .cust-row { display: flex; gap: 8px; }
-        .cust-label { color: var(--text-muted); font-weight: 700; min-width: 85px; }
+        .cust-row { display: flex; gap: 8px; margin-bottom: 3px; }
+        .cust-label { color: var(--text-muted); font-weight: 700; min-width: 90px; font-size: 0.9rem; }
 
         .items-list { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
         .item-row {
@@ -152,7 +151,7 @@
 
         .state-box { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 1.1rem; }
 
-        /* حاوية الفاتورة للطباعة العادية واحتياط المتصفح */
+        /* حاوية الفاتورة للطباعة */
         #printable-receipt { display: none; }
 
         @page {
@@ -244,59 +243,21 @@
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // إعداد التوثيق الرقمي لـ QZ Tray لتمكين الحفظ التلقائي والتخلص من النوافذ
-        function initQzSecurity() {
+        // تفعيل التوثيق الرقمي لـ QZ Tray
+        function setupQzSecurity() {
             qz.security.setCertificatePromise(function(resolve, reject) {
-                resolve("-----BEGIN CERTIFICATE-----\n" +
-                    "MIIFAzCCAuugAwIBAgICEAIwDQYJKoZIhvcNAQEFBQAwgZgxCzAJBgNVBAYTAlVT\n" +
-                    "MQswCQYDVQQIDAJOWTEbMBkGA1UECgwSUVogSW5kdXN0cmllcywgTExDMRswGQYD\n" +
-                    "VQQLDBJRWiBJbmR1c3RyaWVzLCBMTEMxGTAXBgNVBAMMEHF6aW5kdXN0cmllcy5j\n" +
-                    "b20xJzAlBgkqhkiG9w0BCQEWGHN1cHBvcnRAX3ZpbmR1c3RyaWVzLmNvbTAeFw0x\n" +
-                    "NTAzMTkwMjM4NDVaFw0yNTAzMTkwMjM4NDVaMHMxCzAJBgNVBAYTAlVTMQswCQYD\n" +
-                    "VQQIDAJOWTEbMBkGA1UECgwSUVogSW5kdXN0cmllcywgTExDMRswGQYDVQQLDBJR\n" +
-                    "WiBJbmR1c3RyaWVzLCBMTEMxGTAXBgNVBAMMEHF6aW5kdXN0cmllcy5jb20xJzAl\n" +
-                    "BgkqhkiG9w0BCQEWGHN1cHBvcnRAX3ZpbmR1c3RyaWVzLmNvbTCCASIwDQYJKoZI\n" +
-                    "hvcNAQEBBQADggEPADCCAQoCggEBAL0TaRY5FmvM60fF5xT4VqYh54xWkSpnQ8wV\n" +
-                    "9b82v1aN3a65Q5o0hS0hCgU50pZtX1e+P+P2k9p1n0k2w8o5UqL6g1t2Y9f0o8wV\n" +
-                    "2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8\n" +
-                    "wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0\n" +
-                    "g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5\n" +
-                    "f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1\n" +
-                    "p5IDAQABo3sweTAJBgNVHRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdl\n" +
-                    "bmVyYXRlZCBDZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQUkF2B6g9W+X1w1p5f0g8wV2w1\n" +
-                    "p5cwHwYDVR0jBBgwFoAUkF2B6g9W+X1w1p5f0g8wV2w1p5cwDQYJKoZIhvcNAQEF\n" +
-                    "BQADggEBAIS+b1x5t3p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5\n" +
-                    "f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1\n" +
-                    "p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2\n" +
-                    "w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8w\n" +
-                    "V2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g\n" +
-                    "8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f0g8wV2w1p5f\n" +
-                    "0g8w==\n" +
-                    "-----END CERTIFICATE-----");
+                fetch("https://raw.githubusercontent.com/qzind/tray/master/src/qz/resources/sample.crt")
+                    .then(res => res.text())
+                    .then(resolve)
+                    .catch(reject);
             });
 
             qz.security.setSignaturePromise(function(toSign) {
                 return function(resolve, reject) {
-                    try {
-                        const pk = "-----BEGIN PRIVATE KEY-----\n" +
-                            "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC9E2kWORT1rjn9\n" +
-                            "vy/krZ7SlLxoj5TkhqVi0Dldb9mDZ77FmRbQnNWXl7eZn0j7zMvg/87X/Lf4f8bw\n" +
-                            "faVj28PWAnlX1rp7WBfWbiDr6uJ0v5Tf9v4m9v6W9v7e5f8w5v6a9v7e5f8w5v6a\n" +
-                            "9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e\n" +
-                            "5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w\n" +
-                            "5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a\n" +
-                            "9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e5f8w5v6a9v7e\n" +
-                            "AgMBAAECggEBAKxQ1...==\n" +
-                            "-----END PRIVATE KEY-----";
-                        
-                        const sig = new KJUR.crypto.Signature({ "alg": "SHA512withRSA" });
-                        sig.init(pk);
-                        sig.updateString(toSign);
-                        const hex = sig.sign();
-                        resolve(stob64(hextorstr(hex)));
-                    } catch (err) {
-                        resolve(); 
-                    }
+                    fetch("https://demo.qz.io/api/sign-message?request=" + encodeURIComponent(toSign))
+                        .then(res => res.text())
+                        .then(resolve)
+                        .catch(reject);
                 };
             });
         }
@@ -328,7 +289,7 @@
         async function connectQZ() {
             const statusEl = document.getElementById('qz-status');
             try {
-                initQzSecurity(); // تطبيق إعداد الأمان قبل الاتصال
+                setupQzSecurity();
                 if (!qz.websocket.isActive()) {
                     await qz.websocket.connect({ retries: 5, delay: 2 });
                 }
@@ -354,20 +315,20 @@
 
                     itemsRows += `
                         <tr>
-                            <td style="border:1px solid #000; padding:2px 1px; text-align:right; font-weight:bold; font-size:9.5px;">
+                            <td style="border:1px solid #000; padding:3px 2px; text-align:right; font-weight:bold; font-size:10px;">
                                 ${it.name || 'مادة'} ${it.size ? `(${it.size})` : ''}
                             </td>
-                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:9.5px;">${qty.toFixed(2)}</td>
-                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:9.5px;">${price.toLocaleString()}</td>
-                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-weight:bold; font-size:9.5px;">${total.toLocaleString()}</td>
-                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:8.5px; word-wrap:break-word;">${note}</td>
+                            <td style="border:1px solid #000; padding:3px 2px; text-align:center; font-size:10px;">${qty.toFixed(2)}</td>
+                            <td style="border:1px solid #000; padding:3px 2px; text-align:center; font-size:10px;">${price.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:3px 2px; text-align:center; font-weight:bold; font-size:10px;">${total.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:3px 2px; text-align:center; font-size:9px; word-wrap:break-word;">${note}</td>
                         </tr>
                     `;
                 });
             } else {
                 itemsRows = `
                     <tr>
-                        <td colspan="5" style="border:1px solid #000; padding:5px; text-align:center; font-size:9.5px;">
+                        <td colspan="5" style="border:1px solid #000; padding:6px; text-align:center; font-size:10px;">
                             ${ord.itemsText || 'تفاصيل الطلب مسجلة'}
                         </td>
                     </tr>
@@ -382,37 +343,59 @@
             const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
 
             return `
-                <div style="width:72mm; max-width:72mm; min-width:72mm; margin:0; padding:0 1.5mm; font-family:Tahoma, Arial, sans-serif; color:#000; direction:rtl; text-align:right; box-sizing:border-box; line-height:1.2;">
+                <div style="width:72mm; max-width:72mm; min-width:72mm; margin:0; padding:0 1.5mm; font-family:Tahoma, Arial, sans-serif; color:#000; direction:rtl; text-align:right; box-sizing:border-box; line-height:1.25;">
                     
-                    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:3px; margin-bottom:3px;">
+                    <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:4px;">
                         <img src="${logoSrc}" style="width:48px; height:48px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
-                        <div style="font-size:14px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
-                        <div style="font-size:10.5px; font-weight:bold;">بإدارة: قسيم الحريري</div>
-                        <div style="font-size:10.5px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0983831671</span></div>
-                        <div style="font-size:10px; margin-top:1px; font-weight:bold;">فاتورة طلب - ${ord.customer?.orderType || 'خارجي'}</div>
+                        <div style="font-size:15px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
+                        <div style="font-size:11px; font-weight:bold;">بإدارة: قسيم الحريري</div>
+                        <div style="font-size:11px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0983831671</span></div>
+                        <div style="font-size:11px; margin-top:2px; font-weight:bold; background:#eee; padding:1px; border-radius:3px;">نوع الطلب: ${ord.customer?.orderType || 'خارجي'}</div>
                     </div>
 
-                    <div style="border-bottom:1px dashed #000; padding-bottom:3px; margin-bottom:3px;">
-                        <div style="font-size:14px; font-weight:900; text-align:center; margin:1px 0;">رقم الطلب: ${ord.id}</div>
-                        <div style="display:flex; justify-content:space-between; font-size:10px;"><span>التاريخ:</span><span>${ord.date || ''}</span></div>
+                    <!-- صندوق رقم الفاتورة بتصميم بارز وخط كبير -->
+                    <div style="border:2px solid #000; border-radius:6px; padding:4px 2px; margin:5px 0; text-align:center; background:#fafafa;">
+                        <div style="font-size:11px; font-weight:bold; color:#222;">رقم الفاتورة</div>
+                        <div style="font-size:22px; font-weight:900; letter-spacing:1px; line-height:1.1; margin-top:1px;">#${ord.id}</div>
                     </div>
 
+                    <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:bold; border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:4px;">
+                        <span>التاريخ:</span>
+                        <span style="direction:ltr;">${ord.date || ''}</span>
+                    </div>
+
+                    <!-- تفاصيل الزبون والعنوان بحجم أكبر وأوضح -->
                     ${(ord.customer?.name || ord.customer?.phone || ord.customer?.address || ord.customer?.notes) ? `
-                    <div style="border-bottom:1px dashed #000; padding-bottom:3px; margin-bottom:3px; font-size:10px; line-height:1.3;">
-                        ${ord.customer?.name ? `<div style="display:flex; justify-content:space-between;"><span>الزبون:</span><strong>${ord.customer.name}</strong></div>` : ''}
-                        ${ord.customer?.phone ? `<div style="display:flex; justify-content:space-between;"><span>الهاتف:</span><span>${ord.customer.phone}</span></div>` : ''}
-                        ${ord.customer?.address ? `<div style="display:flex; justify-content:space-between;"><span>العنوان:</span><span>${ord.customer.address}</span></div>` : ''}
-                        ${ord.customer?.notes ? `<div style="display:flex; justify-content:space-between; margin-top:1px;"><span>ملاحظة:</span><strong>${ord.customer.notes}</strong></div>` : ''}
+                    <div style="border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:4px; font-size:12px; line-height:1.45;">
+                        ${ord.customer?.name ? `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                <span style="font-weight:bold; min-width:55px;">الزبون:</span>
+                                <strong style="font-size:13.5px; font-weight:900;">${ord.customer.name}</strong>
+                            </div>` : ''}
+                        ${ord.customer?.phone ? `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                <span style="font-weight:bold; min-width:55px;">الهاتف:</span>
+                                <strong style="direction:ltr; font-size:13px; font-weight:900;">${ord.customer.phone}</strong>
+                            </div>` : ''}
+                        ${ord.customer?.address ? `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                                <span style="font-weight:bold; min-width:55px;">العنوان:</span>
+                                <strong style="font-size:12.5px; font-weight:bold; text-align:left;">${ord.customer.address}</strong>
+                            </div>` : ''}
+                        ${ord.customer?.notes ? `
+                            <div style="background:#f4f4f4; border:1px dashed #000; border-radius:4px; padding:3px 6px; margin-top:3px; font-size:11.5px;">
+                                <span style="font-weight:bold;">ملاحظات:</span> <strong>${ord.customer.notes}</strong>
+                            </div>` : ''}
                     </div>` : ''}
 
                     <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin:4px 0; table-layout:fixed;">
                         <thead>
-                            <tr style="background-color:#f2f2f2;">
-                                <th style="border:1px solid #000; padding:2px 1px; width:34%; text-align:center; font-size:9px; white-space:nowrap;">اسم المادة</th>
-                                <th style="border:1px solid #000; padding:2px 1px; width:13%; text-align:center; font-size:9px; white-space:nowrap;">الكمية</th>
-                                <th style="border:1px solid #000; padding:2px 1px; width:19%; text-align:center; font-size:9px; white-space:nowrap;">السعر</th>
-                                <th style="border:1px solid #000; padding:2px 1px; width:19%; text-align:center; font-size:9px; white-space:nowrap;">إجمالي</th>
-                                <th style="border:1px solid #000; padding:2px 1px; width:15%; text-align:center; font-size:8.5px; white-space:nowrap;">ملاحظات</th>
+                            <tr style="background-color:#eee;">
+                                <th style="border:1px solid #000; padding:3px 1px; width:34%; text-align:center; font-size:9.5px; white-space:nowrap;">اسم المادة</th>
+                                <th style="border:1px solid #000; padding:3px 1px; width:13%; text-align:center; font-size:9.5px; white-space:nowrap;">الكمية</th>
+                                <th style="border:1px solid #000; padding:3px 1px; width:19%; text-align:center; font-size:9.5px; white-space:nowrap;">السعر</th>
+                                <th style="border:1px solid #000; padding:3px 1px; width:19%; text-align:center; font-size:9.5px; white-space:nowrap;">إجمالي</th>
+                                <th style="border:1px solid #000; padding:3px 1px; width:15%; text-align:center; font-size:9px; white-space:nowrap;">ملاحظات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -420,7 +403,7 @@
                         </tbody>
                     </table>
 
-                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:10.5px; font-weight:bold;">
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:11px; font-weight:bold;">
                         <tr>
                             <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:right;">مجموع الطلب</td>
                             <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:center;">${subtotal.toLocaleString()}</td>
@@ -429,18 +412,18 @@
                             <td style="border:1px solid #000; padding:2px 4px; text-align:right;">الحسم</td>
                             <td style="border:1px solid #000; padding:2px 4px; text-align:center;">${discount.toLocaleString()}</td>
                         </tr>
-                        <tr>
-                            <td style="border:1px solid #000; padding:2px 4px; text-align:right;">الصافي</td>
-                            <td style="border:1px solid #000; padding:2px 4px; text-align:center;">${netTotal.toLocaleString()}</td>
+                        <tr style="background:#eee;">
+                            <td style="border:1px solid #000; padding:3px 4px; text-align:right; font-size:12px;">الصافي النهائي</td>
+                            <td style="border:1px solid #000; padding:3px 4px; text-align:center; font-size:13px; font-weight:900;">${netTotal.toLocaleString()}</td>
                         </tr>
                     </table>
 
                     <div style="text-align:center; margin-top:3px; padding-top:2px;">
-                        <img src="${qrSrc}" style="width:48px; height:48px; margin:0 auto; display:block;" alt="QR">
+                        <img src="${qrSrc}" style="width:46px; height:46px; margin:0 auto; display:block;" alt="QR">
                         <div style="font-size:8.5px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
                     </div>
 
-                    <div style="text-align:center; font-size:11px; font-weight:bold; margin-top:3px; padding-bottom:4mm;">
+                    <div style="text-align:center; font-size:11.5px; font-weight:bold; margin-top:3px; padding-bottom:4mm;">
                         شكراً لزيارتكم مطعم عالم الفواكه!
                     </div>
                 </div>
@@ -721,7 +704,7 @@
                     <div class="order-card ${isArchived ? 'archived' : ''}">
                         <div class="order-head">
                             <div>
-                                <span class="order-id">${ord.id}</span>
+                                <span class="order-id">#${ord.id}</span>
                                 <div class="order-time"><i class="fa-regular fa-clock"></i> ${ord.date}</div>
                             </div>
                             <div class="badges-wrap">
