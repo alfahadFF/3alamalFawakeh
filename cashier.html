@@ -295,20 +295,20 @@
 
                     itemsRows += `
                         <tr>
-                            <td style="border:1px solid #000; padding:2px; text-align:right; font-weight:bold; font-size:10px;">
+                            <td style="border:1px solid #000; padding:2px 1px; text-align:right; font-weight:bold; font-size:9.5px;">
                                 ${it.name || 'مادة'} ${it.size ? `(${it.size})` : ''}
                             </td>
-                            <td style="border:1px solid #000; padding:2px; text-align:center; font-size:10px;">${qty.toFixed(2)}</td>
-                            <td style="border:1px solid #000; padding:2px; text-align:center; font-size:10px;">${price.toLocaleString()}</td>
-                            <td style="border:1px solid #000; padding:2px; text-align:center; font-weight:bold; font-size:10px;">${total.toLocaleString()}</td>
-                            <td style="border:1px solid #000; padding:2px; text-align:center; font-size:9px; word-wrap:break-word;">${note}</td>
+                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:9.5px;">${qty.toFixed(2)}</td>
+                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:9.5px;">${price.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-weight:bold; font-size:9.5px;">${total.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:2px 1px; text-align:center; font-size:8.5px; word-wrap:break-word;">${note}</td>
                         </tr>
                     `;
                 });
             } else {
                 itemsRows = `
                     <tr>
-                        <td colspan="5" style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">
+                        <td colspan="5" style="border:1px solid #000; padding:5px; text-align:center; font-size:9.5px;">
                             ${ord.itemsText || 'تفاصيل الطلب مسجلة'}
                         </td>
                     </tr>
@@ -323,13 +323,13 @@
             const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
 
             return `
-                <div style="width:72mm; max-width:72mm; min-width:72mm; margin:0; padding:0 2mm; font-family:Tahoma, Arial, sans-serif; color:#000; direction:rtl; text-align:right; box-sizing:border-box; line-height:1.2;">
+                <div style="width:72mm; max-width:72mm; min-width:72mm; margin:0; padding:0 1.5mm; font-family:Tahoma, Arial, sans-serif; color:#000; direction:rtl; text-align:right; box-sizing:border-box; line-height:1.2;">
                     
                     <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:3px; margin-bottom:3px;">
-                        <img src="${logoSrc}" style="width:50px; height:50px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
+                        <img src="${logoSrc}" style="width:48px; height:48px; object-fit:contain; filter:contrast(180%); margin:0 auto 2px; display:block;" alt="لوغو">
                         <div style="font-size:14px; font-weight:900; margin:1px 0;">مطعم عالم الفواكه</div>
-                        <div style="font-size:11px; font-weight:bold;">بإدارة: قسيم الحريري</div>
-                        <div style="font-size:11px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0983831671</span></div>
+                        <div style="font-size:10.5px; font-weight:bold;">بإدارة: قسيم الحريري</div>
+                        <div style="font-size:10.5px; font-weight:bold;">هاتف: <span style="direction:ltr; display:inline-block;">0983831671</span></div>
                         <div style="font-size:10px; margin-top:1px; font-weight:bold;">فاتورة طلب - ${ord.customer?.orderType || 'خارجي'}</div>
                     </div>
 
@@ -346,14 +346,14 @@
                         ${ord.customer?.notes ? `<div style="display:flex; justify-content:space-between; margin-top:1px;"><span>ملاحظة:</span><strong>${ord.customer.notes}</strong></div>` : ''}
                     </div>` : ''}
 
-                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin:4px 0; table-layout:fixed; word-wrap:break-word;">
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin:4px 0; table-layout:fixed;">
                         <thead>
                             <tr style="background-color:#f2f2f2;">
-                                <th style="border:1px solid #000; padding:2px; width:35%; text-align:center; font-size:9.5px;">اسم المادة</th>
-                                <th style="border:1px solid #000; padding:2px; width:13%; text-align:center; font-size:9.5px;">الكمية</th>
-                                <th style="border:1px solid #000; padding:2px; width:20%; text-align:center; font-size:9.5px;">السعر</th>
-                                <th style="border:1px solid #000; padding:2px; width:20%; text-align:center; font-size:9.5px;">إجمالي</th>
-                                <th style="border:1px solid #000; padding:2px; width:12%; text-align:center; font-size:9.5px;">ملاحظات</th>
+                                <th style="border:1px solid #000; padding:2px 1px; width:34%; text-align:center; font-size:9px; white-space:nowrap;">اسم المادة</th>
+                                <th style="border:1px solid #000; padding:2px 1px; width:13%; text-align:center; font-size:9px; white-space:nowrap;">الكمية</th>
+                                <th style="border:1px solid #000; padding:2px 1px; width:19%; text-align:center; font-size:9px; white-space:nowrap;">السعر</th>
+                                <th style="border:1px solid #000; padding:2px 1px; width:19%; text-align:center; font-size:9px; white-space:nowrap;">إجمالي</th>
+                                <th style="border:1px solid #000; padding:2px 1px; width:15%; text-align:center; font-size:8.5px; white-space:nowrap;">ملاحظات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -361,7 +361,7 @@
                         </tbody>
                     </table>
 
-                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:11px; font-weight:bold;">
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:10.5px; font-weight:bold;">
                         <tr>
                             <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:right;">مجموع الطلب</td>
                             <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:center;">${subtotal.toLocaleString()}</td>
@@ -377,11 +377,11 @@
                     </table>
 
                     <div style="text-align:center; margin-top:3px; padding-top:2px;">
-                        <img src="${qrSrc}" style="width:50px; height:50px; margin:0 auto; display:block;" alt="QR">
-                        <div style="font-size:9px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
+                        <img src="${qrSrc}" style="width:48px; height:48px; margin:0 auto; display:block;" alt="QR">
+                        <div style="font-size:8.5px; font-weight:bold; margin-top:2px;">امسح الكود لتصفح المينيو والطلب 📲</div>
                     </div>
 
-                    <div style="text-align:center; font-size:11px; font-weight:bold; margin-top:3px; padding-bottom:5mm;">
+                    <div style="text-align:center; font-size:11px; font-weight:bold; margin-top:3px; padding-bottom:4mm;">
                         شكراً لزيارتكم مطعم عالم الفواكه!
                     </div>
                 </div>
