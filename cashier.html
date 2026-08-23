@@ -243,18 +243,39 @@
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // تفعيل التوثيق الرقمي لـ QZ Tray
+        // ==== شهادة QZ Tray الخاصة (self-signed) ====
+        const QZ_CERTIFICATE = `-----BEGIN CERTIFICATE-----
+MIIDqjCCApKgAwIBAgIUNcfzw1aCkeJyRkTLb5wP7u/x2MQwDQYJKoZIhvcNAQEL
+BQAwVDEaMBgGA1UEAwwRYWxmYWhkLXJlc3RhdXJhbnQxCzAJBgNVBAYTAlVTMREw
+DwYDVQQIDAhOZXcgWW9yazEWMBQGA1UEBwwNTmV3IFlvcmsgQ2l0eTAeFw0yNjA4
+MjMwMDQwMzJaFw0yNzA4MjMwMDQwMzJaMFQxGjAYBgNVBAMMEWFsZmFoZC1yZXN0
+YXVyYW50MQswCQYDVQQGEwJVUzERMA8GA1UECAwITmV3IFlvcmsxFjAUBgNVBAcM
+DU5ldyBZb3JrIENpdHkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC3
+jVDbH2+NCArZbMXbngtwbhLpWnIX64ZE3Wl6vrjeYWzJTSysqzdA8VsyIbzTtdNi
+DCjt+73SmEomBc1loYnerFuX4er3sTv+sgm2MxXxEHWZp832zHlN8hpS+ewsKJhb
+WAJxcEFQgYiEQ1t/sAgooan+ib448Cyx9n5sFZNKg5cpc8l0xwGlMNGC4qSQh9IU
+RmE1sGzl+NJ6TyXyywDxjasQlCEqIq6JPcw2azPd5ukPyHejiN7xXHQNBld5VisS
+/GopOLRhv/d2vVM64mW8AHyFH+mPtCvew9EC+six/fqva6RThBqYGT8HIsmwA9ZR
+ymkc6+Rj2+JQJGVuWdrNAgMBAAGjdDByMB0GA1UdDgQWBBQ5YlZGtMSYYOey0tkv
+5tEQvnCubzAfBgNVHSMEGDAWgBQ5YlZGtMSYYOey0tkv5tEQvnCubzAOBgNVHQ8B
+Af8EBAMCBaAwIAYDVR0lAQH/BBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqG
+SIb3DQEBCwUAA4IBAQAiDGCjl0hzXlEy+3gAv6HT/2r6aaaQKKWztoXz2L+VWEK9
+6WgLvBhq0UKaEDLPDpgxd7+p/X2dfSp6Z5Wxqu0UZnTArrdQopsQzHkJtmcDQR1d
+YWAIWA4DxrgaEjN5h4uSxl24uXctylk9ViqR3mrnMZIR6d0lq3gtNM4hnD25X3Wx
+Xi83p8W87r4lNtJM4I59K1T1AfmaiWd5UmgueuzYyMMO+SbIijZ9eqEmMkyCp0lv
+Q2nGc0DDaB9KQxtWuTiUpvR685iURADH8A3+AjY7AVrch9rnooxHR//8SOQX8rmn
+nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
+-----END CERTIFICATE-----`;
+
+        // تفعيل التوثيق الرقمي لـ QZ Tray (شهادة خاصة + توقيع عبر السيرفر)
         function setupQzSecurity() {
-            qz.security.setCertificatePromise(function(resolve, reject) {
-                fetch("https://raw.githubusercontent.com/qzind/tray/master/src/qz/resources/sample.crt")
-                    .then(res => res.text())
-                    .then(resolve)
-                    .catch(reject);
+            qz.security.setCertificatePromise(function(resolve) {
+                resolve(QZ_CERTIFICATE);
             });
 
             qz.security.setSignaturePromise(function(toSign) {
                 return function(resolve, reject) {
-                    fetch("https://demo.qz.io/api/sign-message?request=" + encodeURIComponent(toSign))
+                    fetch("/.netlify/functions/qz-sign?request=" + encodeURIComponent(toSign))
                         .then(res => res.text())
                         .then(resolve)
                         .catch(reject);
@@ -505,26 +526,31 @@
             }
         }
 
+        // ==== جرس التنبيه الاحتياطي (نغمة مضاعفة أوضح) ====
         function playChimeSound() {
             if (!soundEnabled) return;
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtx) return;
                 const ctx = new AudioCtx();
-                const playTone = (freq, start, duration) => {
+                const playTone = (freq, start, duration, volume = 0.5) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-                    gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
+                    gain.gain.setValueAtTime(volume, ctx.currentTime + start);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
                     osc.start(ctx.currentTime + start);
                     osc.stop(ctx.currentTime + start + duration);
                 };
+                // نغمة أولى
                 playTone(587.33, 0, 0.4);
                 playTone(880.00, 0.18, 0.7);
+                // نغمة ثانية بعد فاصل قصير (تأكيد احتياطي بحال ما انتبه الكاشير للأولى)
+                playTone(587.33, 1.1, 0.4);
+                playTone(880.00, 1.28, 0.7);
             } catch (e) {}
         }
 
@@ -632,6 +658,7 @@
                     });
 
                     if (latestNewOrder) {
+                        // الجرس يعمل دائماً كنسخة احتياطية بغض النظر عن نجاح الطباعة
                         playChimeSound();
                         silentPrintBothPrinters(latestNewOrder);
                     }
@@ -738,4 +765,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
