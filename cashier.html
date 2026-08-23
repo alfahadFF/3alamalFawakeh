@@ -102,7 +102,8 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px dashed var(--border-color); padding-bottom: 10px;
         }
-        .order-id { font-size: 1.4rem; font-weight: 900; color: var(--primary-color); }
+        .order-id { font-size: 1.4rem; font-weight: 900; color: var(--primary-color); display: inline-flex; align-items: baseline; gap: 4px; }
+        .order-id-prefix { font-size: 0.8rem; font-weight: 800; color: #888; text-transform: uppercase; }
         
         .badges-wrap { display: flex; gap: 6px; align-items: center; }
         .order-badge {
@@ -134,11 +135,13 @@
             font-size: 0.78rem; padding: 2px 6px; border-radius: 4px; margin-top: 3px; font-weight: 600;
         }
 
-        .order-total-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 1.2rem; font-weight: 900; color: var(--primary-color);
-            padding-top: 8px; border-top: 1px solid var(--border-color);
+        .order-total-box {
+            background: #141414; padding: 10px 14px; border-radius: 8px; border: 1px solid #252525;
+            display: flex; flex-direction: column; gap: 5px;
         }
+        .total-line { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-muted); font-weight: 700; }
+        .total-line.discount { color: #25d366; }
+        .total-line.final { font-size: 1.25rem; font-weight: 900; color: var(--primary-color); border-top: 1px dashed var(--border-color); padding-top: 6px; margin-top: 2px; }
 
         .print-actions { display: flex; gap: 10px; }
         .print-btn {
@@ -267,7 +270,6 @@ Q2nGc0DDaB9KQxtWuTiUpvR685iURADH8A3+AjY7AVrch9rnooxHR//8SOQX8rmn
 nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
 -----END CERTIFICATE-----`;
 
-        // تفعيل التوثيق الرقمي لـ QZ Tray (شهادة خاصة + توقيع عبر السيرفر)
         function setupQzSecurity() {
             qz.security.setCertificatePromise(function(resolve) {
                 resolve(QZ_CERTIFICATE);
@@ -324,6 +326,85 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
             }
         }
 
+        // تحويل وتفسير التواريخ
+        function parseOrderDate(order) {
+            if (!order || !order.date) return new Date();
+            try {
+                let dateStr = String(order.date).trim();
+                const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+                arabicDigits.forEach((digit, i) => { dateStr = dateStr.replace(new RegExp(digit, 'g'), i); });
+
+                const isPM = dateStr.includes('م') || /pm/i.test(dateStr);
+                const isAM = dateStr.includes('ص') || /am/i.test(dateStr);
+                dateStr = dateStr.replace(/[صمAPMapm]/g, '').trim();
+
+                const parts = dateStr.split(/[\s,]+/);
+                if (parts.length < 2) return new Date();
+
+                const dateParts = parts[0].split(/[\/\-\.]/).map(p => parseInt(p, 10));
+                const timeParts = parts[1].split(':').map(p => parseInt(p, 10));
+                if (dateParts.length < 3 || timeParts.length < 1) return new Date();
+
+                let day, month, year;
+                if (dateParts[0] > 1000) { year = dateParts[0]; month = dateParts[1] - 1; day = dateParts[2]; }
+                else { day = dateParts[0]; month = dateParts[1] - 1; year = dateParts[2]; }
+
+                let hours = timeParts[0];
+                const minutes = timeParts[1] || 0;
+                const seconds = timeParts[2] || 0;
+                if (isPM && hours < 12) hours += 12;
+                if (isAM && hours === 12) hours = 0;
+
+                const orderDateObj = new Date(year, month, day, hours, minutes, seconds);
+                return isNaN(orderDateObj.getTime()) ? new Date() : orderDateObj;
+            } catch (err) {
+                return new Date();
+            }
+        }
+
+        // حساب ترقيم الفاتورة اليومي الذي يبدأ الساعة 8 صباحاً برقم 001
+        function computeDailySequences(orders) {
+            if (!Array.isArray(orders)) return;
+            const groups = {};
+
+            orders.forEach(ord => {
+                const dateObj = parseOrderDate(ord);
+                // إزاحة الوقت 8 ساعات للوراء: تصبح الفترة من 8:00 صباحاً اليوم حتى 7:59 صباح الغد تتبع نفس التاريخ
+                const shiftTime = dateObj.getTime() - (8 * 60 * 60 * 1000);
+                const shiftDate = new Date(shiftTime);
+                const cycleKey = `${shiftDate.getFullYear()}-${shiftDate.getMonth() + 1}-${shiftDate.getDate()}`;
+
+                if (!groups[cycleKey]) groups[cycleKey] = [];
+                groups[cycleKey].push({ ord, time: dateObj.getTime() });
+            });
+
+            Object.keys(groups).forEach(key => {
+                // الفرز تصاعدياً بحسب وقت الطلب
+                groups[key].sort((a, b) => a.time - b.time);
+                groups[key].forEach((item, idx) => {
+                    item.ord.dailySeq = String(idx + 1).padStart(3, '0');
+                });
+            });
+        }
+
+        function calculateOrderFinancials(ord) {
+            let itemsSum = 0;
+            if (Array.isArray(ord.items) && ord.items.length > 0) {
+                ord.items.forEach(it => {
+                    const price = Number(it.unitPrice || 0);
+                    const qty = Number(it.qty || 1);
+                    itemsSum += (price * qty);
+                });
+            }
+            const originalSubtotal = itemsSum > 0 ? itemsSum : Number(ord.subtotal || ord.total || 0);
+            
+            // خصم 3% تلقائي
+            const discount = Math.round(originalSubtotal * 0.03);
+            const netTotal = Math.max(0, originalSubtotal - discount);
+
+            return { originalSubtotal, discount, netTotal };
+        }
+
         function generateReceiptHtml(ord) {
             let itemsRows = '';
             
@@ -356,9 +437,8 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                 `;
             }
 
-            const netTotal = Number(ord.total || ord.subtotal || 0);
-            const discount = Number(ord.discount || 0);
-            const subtotal = netTotal + discount;
+            const financials = calculateOrderFinancials(ord);
+            const dailyNum = ord.dailySeq || '001';
 
             const logoSrc = cachedLogoBase64 || `${window.location.origin}/Black-logo.png`;
             const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
@@ -374,10 +454,13 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         <div style="font-size:11px; margin-top:2px; font-weight:bold; background:#eee; padding:1px; border-radius:3px;">نوع الطلب: ${ord.customer?.orderType || 'خارجي'}</div>
                     </div>
 
-                    <!-- صندوق رقم الفاتورة بتصميم بارز وخط كبير -->
+                    <!-- صندوق رقم الفاتورة بتصميم on صغير وبداية من 001 يومياً -->
                     <div style="border:2px solid #000; border-radius:6px; padding:4px 2px; margin:5px 0; text-align:center; background:#fafafa;">
                         <div style="font-size:11px; font-weight:bold; color:#222;">رقم الفاتورة</div>
-                        <div style="font-size:22px; font-weight:900; letter-spacing:1px; line-height:1.1; margin-top:1px;">#${ord.id}</div>
+                        <div style="font-size:22px; font-weight:900; letter-spacing:1px; line-height:1.1; margin-top:1px; display:flex; align-items:baseline; justify-content:center; gap:5px;">
+                            <span style="font-size:12px; font-weight:bold; color:#555; text-transform:uppercase;">on</span>
+                            <span>${dailyNum}</span>
+                        </div>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:bold; border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:4px;">
@@ -385,7 +468,7 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         <span style="direction:ltr;">${ord.date || ''}</span>
                     </div>
 
-                    <!-- تفاصيل الزبون والعنوان بحجم أكبر وأوضح -->
+                    <!-- تفاصيل الزبون والعنوان -->
                     ${(ord.customer?.name || ord.customer?.phone || ord.customer?.address || ord.customer?.notes) ? `
                     <div style="border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:4px; font-size:12px; line-height:1.45;">
                         ${ord.customer?.name ? `
@@ -416,7 +499,7 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                                 <th style="border:1px solid #000; padding:3px 1px; width:13%; text-align:center; font-size:9.5px; white-space:nowrap;">الكمية</th>
                                 <th style="border:1px solid #000; padding:3px 1px; width:19%; text-align:center; font-size:9.5px; white-space:nowrap;">السعر</th>
                                 <th style="border:1px solid #000; padding:3px 1px; width:19%; text-align:center; font-size:9.5px; white-space:nowrap;">إجمالي</th>
-                                <th style="border:1px solid #000; padding:3px 1px; width:15%; text-align:center; font-size:9px; white-space:nowrap;">ملاحظات</th>
+                                <th style="border:1px solid #000; padding:3px 1px; width:15%; text-align:center; font-size:9.5px; white-space:nowrap;">ملاحظات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -424,18 +507,19 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         </tbody>
                     </table>
 
+                    <!-- جدول الإجماليات مع الخصم الآلي 3% -->
                     <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:11px; font-weight:bold;">
                         <tr>
-                            <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:right;">مجموع الطلب</td>
-                            <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:center;">${subtotal.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:right;">المجموع الأصلي</td>
+                            <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:center;">${financials.originalSubtotal.toLocaleString()}</td>
                         </tr>
                         <tr>
-                            <td style="border:1px solid #000; padding:2px 4px; text-align:right;">الحسم</td>
-                            <td style="border:1px solid #000; padding:2px 4px; text-align:center;">${discount.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:2px 4px; text-align:right;">الحسم (3%)</td>
+                            <td style="border:1px solid #000; padding:2px 4px; text-align:center;">${financials.discount.toLocaleString()}</td>
                         </tr>
                         <tr style="background:#eee;">
                             <td style="border:1px solid #000; padding:3px 4px; text-align:right; font-size:12px;">الصافي النهائي</td>
-                            <td style="border:1px solid #000; padding:3px 4px; text-align:center; font-size:13px; font-weight:900;">${netTotal.toLocaleString()}</td>
+                            <td style="border:1px solid #000; padding:3px 4px; text-align:center; font-size:13px; font-weight:900;">${financials.netTotal.toLocaleString()}</td>
                         </tr>
                     </table>
 
@@ -489,44 +573,12 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
         }
 
         function isOrderOlderThan3Hours(order) {
-            if (!order || !order.date) return false;
-            try {
-                let dateStr = String(order.date).trim();
-                const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-                arabicDigits.forEach((digit, i) => { dateStr = dateStr.replace(new RegExp(digit, 'g'), i); });
-
-                const isPM = dateStr.includes('م') || /pm/i.test(dateStr);
-                const isAM = dateStr.includes('ص') || /am/i.test(dateStr);
-                dateStr = dateStr.replace(/[صمAPMapm]/g, '').trim();
-
-                const parts = dateStr.split(/[\s,]+/);
-                if (parts.length < 2) return false;
-
-                const dateParts = parts[0].split(/[\/\-\.]/).map(p => parseInt(p, 10));
-                const timeParts = parts[1].split(':').map(p => parseInt(p, 10));
-                if (dateParts.length < 3 || timeParts.length < 1) return false;
-
-                let day, month, year;
-                if (dateParts[0] > 1000) { year = dateParts[0]; month = dateParts[1] - 1; day = dateParts[2]; }
-                else { day = dateParts[0]; month = dateParts[1] - 1; year = dateParts[2]; }
-
-                let hours = timeParts[0];
-                const minutes = timeParts[1] || 0;
-                const seconds = timeParts[2] || 0;
-                if (isPM && hours < 12) hours += 12;
-                if (isAM && hours === 12) hours = 0;
-
-                const orderDateObj = new Date(year, month, day, hours, minutes, seconds);
-                const orderTimestamp = orderDateObj.getTime();
-                if (isNaN(orderTimestamp)) return false;
-
-                return (Date.now() - orderTimestamp) > (3 * 60 * 60 * 1000);
-            } catch (err) {
-                return false;
-            }
+            const orderDateObj = parseOrderDate(order);
+            const orderTimestamp = orderDateObj.getTime();
+            if (isNaN(orderTimestamp) || orderTimestamp === 0) return false;
+            return (Date.now() - orderTimestamp) > (3 * 60 * 60 * 1000);
         }
 
-        // ==== جرس التنبيه الاحتياطي (نغمة مضاعفة أوضح) ====
         function playChimeSound() {
             if (!soundEnabled) return;
             try {
@@ -545,10 +597,8 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                     osc.start(ctx.currentTime + start);
                     osc.stop(ctx.currentTime + start + duration);
                 };
-                // نغمة أولى
                 playTone(587.33, 0, 0.4);
                 playTone(880.00, 0.18, 0.7);
-                // نغمة ثانية بعد فاصل قصير (تأكيد احتياطي بحال ما انتبه الكاشير للأولى)
                 playTone(587.33, 1.1, 0.4);
                 playTone(880.00, 1.28, 0.7);
             } catch (e) {}
@@ -649,6 +699,9 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                 const fetchedOrders = await response.json();
                 if (!Array.isArray(fetchedOrders)) return;
 
+                // احتساب تسلسل الفواتير اليومي اعتباراً من 8 صباحاً
+                computeDailySequences(fetchedOrders);
+
                 if (!isFirstLoad) {
                     let latestNewOrder = null;
                     fetchedOrders.forEach(ord => {
@@ -658,7 +711,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                     });
 
                     if (latestNewOrder) {
-                        // الجرس يعمل دائماً كنسخة احتياطية بغض النظر عن نجاح الطباعة
                         playChimeSound();
                         silentPrintBothPrinters(latestNewOrder);
                     }
@@ -712,6 +764,8 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
             container.innerHTML = filtered.map((ord) => {
                 const isArchived = isOrderOlderThan3Hours(ord);
                 const originalIndex = liveOrders.findIndex(o => o.id === ord.id);
+                const financials = calculateOrderFinancials(ord);
+                const dailyNum = ord.dailySeq || '001';
 
                 const itemsList = Array.isArray(ord.items) && ord.items.length > 0
                     ? ord.items.map(it => `
@@ -725,13 +779,11 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                     `).join('')
                     : `<div style="color:var(--text-muted); font-size:0.85rem;">${ord.itemsText || 'تفاصيل الأصناف مسجلة'}</div>`;
 
-                const totalVal = ord.total || ord.subtotal || 0;
-
                 return `
                     <div class="order-card ${isArchived ? 'archived' : ''}">
                         <div class="order-head">
                             <div>
-                                <span class="order-id">#${ord.id}</span>
+                                <span class="order-id"><span class="order-id-prefix">on</span> ${dailyNum}</span>
                                 <div class="order-time"><i class="fa-regular fa-clock"></i> ${ord.date}</div>
                             </div>
                             <div class="badges-wrap">
@@ -749,9 +801,20 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
 
                         <div class="items-list">${itemsList}</div>
 
-                        <div class="order-total-row">
-                            <span>المجموع الكلي:</span>
-                            <span>${Number(totalVal).toLocaleString()} ل.س</span>
+                        <!-- صندوق عرض الإجماليات والخصم الآلي 3% -->
+                        <div class="order-total-box">
+                            <div class="total-line">
+                                <span>المجموع الأصلي:</span>
+                                <span>${financials.originalSubtotal.toLocaleString()} ل.س</span>
+                            </div>
+                            <div class="total-line discount">
+                                <span>الحسم (3%):</span>
+                                <span>- ${financials.discount.toLocaleString()} ل.س</span>
+                            </div>
+                            <div class="total-line final">
+                                <span>الصافي بعد الحسم:</span>
+                                <span>${financials.netTotal.toLocaleString()} ل.س</span>
+                            </div>
                         </div>
 
                         <div class="print-actions">
@@ -765,4 +828,4 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
         }
     </script>
 </body>
-    </html>
+</html>
