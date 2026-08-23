@@ -167,7 +167,8 @@
 
         .cart-summary { background: var(--card-sub-bg); padding: 12px 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem; margin-bottom: 20px; border: 1px solid var(--border-color); }
         .summary-row { display: flex; justify-content: space-between; align-items: center; }
-        .summary-row.total { font-size: 1.2rem; font-weight: 800; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px; }
+        .summary-row.discount-row { color: #25d366; font-weight: bold; }
+        .summary-row.total { font-size: 1.2rem; font-weight: 800; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px; color: var(--primary-color); }
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 15px; }
         .form-group { display: flex; flex-direction: column; gap: 5px; }
@@ -184,7 +185,7 @@
         }
         .send-whatsapp-btn:hover { background: #1eb956; }
 
-        /* نافذة معاينة الفاتورة المنبثقة وترويستها الرسمية */
+        /* نافذة معاينة الفاتورة المنبثقة */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px);
@@ -196,7 +197,6 @@
             overflow-y: auto; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.9);
         }
 
-        /* ترويسة الفاتورة المعتمدة */
         .receipt-official-header {
             background: linear-gradient(135deg, #111, #222);
             border: 1px dashed #444; border-radius: 14px;
@@ -229,8 +229,8 @@
         }
         .receipt-item-row:last-child { border-bottom: none; }
         .receipt-total-row {
-            display: flex; justify-content: space-between; border-top: 2px dashed #444;
-            padding-top: 8px; margin-top: 6px; font-size: 1.05rem; font-weight: 800; color: var(--primary-color);
+            display: flex; justify-content: space-between; border-top: 1px dashed #444;
+            padding-top: 8px; margin-top: 6px; font-size: 1.15rem; font-weight: 800; color: var(--primary-color);
         }
 
         .modal-actions { display: flex; gap: 10px; }
@@ -308,17 +308,22 @@
                 <div id="empty-cart-msg" class="empty-cart-msg">السلة فارغة حالياً. قم بإضافة أصناف من المينيو في الأعلى!</div>
             </div>
 
+            <!-- ملخص السلة مع الخصم 3% -->
             <div class="cart-summary">
                 <div class="summary-row">
-                    <span>مجموع الأصناف:</span>
+                    <span>مجموع الأصناف الأصلي:</span>
                     <span id="cart-subtotal">0 ل.س</span>
+                </div>
+                <div class="summary-row discount-row">
+                    <span>حسم خاص (3%):</span>
+                    <span id="cart-discount">- 0 ل.س</span>
                 </div>
                 <div class="summary-row" id="delivery-row" style="display: none; color: #25d366;">
                     <span>رسوم التوصيل (داخل داعل):</span>
                     <span>مجاني</span>
                 </div>
                 <div class="summary-row total">
-                    <span>المجموع الكلي:</span>
+                    <span>الصافي النهائي بعد الحسم:</span>
                     <span class="total-price" id="cart-total">0 ل.س</span>
                 </div>
             </div>
@@ -351,7 +356,6 @@
                             <option value="صالة">تناول في الصالة</option>
                         </select>
                     </div>
-                    <!-- حقل العنوان (يظهر فقط في حال طلبات التوصيل) -->
                     <div class="form-group" id="address-group">
                         <label for="cust-address">العنوان التفصيلي <span style="color:red">*</span></label>
                         <input type="text" id="cust-address" class="form-input" placeholder="الحي - الشارع - علامة مميزة" required>
@@ -365,11 +369,10 @@
         </section>
     </main>
 
-    <!-- نافذة الفاتورة المعتمدة التي تظهر عند الضغط على تأكيد الطلب -->
+    <!-- نافذة الفاتورة المعتمدة -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-card">
             
-            <!-- ترويسة الفاتورة الرسمية -->
             <div class="receipt-official-header">
                 <div class="receipt-brand-meta">
                     <img src="/logo.png" alt="لوغو" class="receipt-logo-thumb" onerror="this.src='/icon-192.png'">
@@ -438,6 +441,39 @@
         const WHATSAPP_PHONE = '963957984951';
         const MANAGER_PHONE = '0938174782';
 
+        // دالة توليد رقم الفاتورة التسلسلي اليومي بدءاً من الساعة 8:00 صباحاً برقم 001
+        function getDailyOrderNumberInfo() {
+            const now = new Date();
+            // إزاحة 8 ساعات للوراء لتكون الدورة اليومية من 8 ص اليوم حتى 7:59 ص الغد
+            const shiftTime = new Date(now.getTime() - (8 * 60 * 60 * 1000));
+            const cycleKey = `${shiftTime.getFullYear()}-${shiftTime.getMonth() + 1}-${shiftTime.getDate()}`;
+
+            let storedData = {};
+            try {
+                storedData = JSON.parse(localStorage.getItem('al_fawakeh_order_seq') || '{}');
+            } catch (e) {}
+
+            let nextSeq = 1;
+            if (storedData.cycleKey === cycleKey && typeof storedData.count === 'number') {
+                nextSeq = storedData.count + 1;
+            }
+
+            return {
+                cycleKey: cycleKey,
+                seqNumber: nextSeq,
+                formattedSeq: String(nextSeq).padStart(3, '0')
+            };
+        }
+
+        function saveDailyOrderNumberCommitted(cycleKey, seqNumber) {
+            try {
+                localStorage.setItem('al_fawakeh_order_seq', JSON.stringify({
+                    cycleKey: cycleKey,
+                    count: seqNumber
+                }));
+            } catch (e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', () => { 
             fetchLiveMenu();
             handleOrderTypeChange();
@@ -497,7 +533,6 @@
                 const image = getValue(row, 'image_url') || '/logo.png';
 
                 const isAvailable = !rawStatus.includes('غير') && !rawStatus.includes('نفذ') && !rawStatus.includes('لا');
-
                 const groupKey = `${category}_${name}`.trim();
 
                 if (!productsMap[groupKey]) {
@@ -656,7 +691,6 @@
 
             const noteInput = document.getElementById(`note-${productId}`);
             const itemNote = noteInput ? noteInput.value.trim() : '';
-
             const qtyToAdd = productQuantities[productId] || 1;
 
             const cartItemKey = `${productId}_${selectedVariant.size}_${itemNote}`;
@@ -685,7 +719,8 @@
             const emptyMsg = document.getElementById('empty-cart-msg');
             cartTbody.innerHTML = '';
 
-            let subtotal = 0; let totalCount = 0;
+            let subtotal = 0; 
+            let totalCount = 0;
 
             if (cart.length === 0) {
                 emptyMsg.style.display = 'block';
@@ -694,7 +729,8 @@
 
                 cart.forEach((item, index) => {
                     const itemTotal = item.unitPrice * item.qty;
-                    subtotal += itemTotal; totalCount += item.qty;
+                    subtotal += itemTotal; 
+                    totalCount += item.qty;
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -735,23 +771,26 @@
                 deliveryRow.style.display = 'none';
             }
 
+            // حساب الحسم الآلي 3%
+            const discount = Math.round(subtotal * 0.03);
+            const netTotal = Math.max(0, subtotal - discount);
+
             document.getElementById('cart-subtotal').innerText = `${subtotal.toLocaleString()} ل.س`;
-            document.getElementById('cart-total').innerText = `${subtotal.toLocaleString()} ل.س`;
+            document.getElementById('cart-discount').innerText = `- ${discount.toLocaleString()} ل.س`;
+            document.getElementById('cart-total').innerText = `${netTotal.toLocaleString()} ل.س`;
             document.getElementById('float-cart-count').innerText = totalCount;
         }
 
-        // معالجة تغيير نوع الطلب وتحديث حالة حقل العنوان
         function handleOrderTypeChange() {
             const orderType = document.getElementById('order-type').value;
             const addressGroup = document.getElementById('address-group');
             const addressInput = document.getElementById('cust-address');
-
             const isDelivery = orderType.includes('توصيل');
 
             if (isDelivery) {
                 addressGroup.style.display = 'flex';
                 addressInput.setAttribute('required', 'true');
-                if (addressInput.value === 'سفري (استلام من المحل)' || addressInput.value === 'تناول في الصالة') {
+                if (addressInput.value === 'سفري' || addressInput.value === 'صالة') {
                     addressInput.value = '';
                 }
             } else {
@@ -771,7 +810,7 @@
         function removeCartItem(index) { cart.splice(index, 1); renderCart(); }
         function scrollToCart() { document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' }); }
 
-        // فتح نافذة الفاتورة للمعاينة قبل الإرسال
+        // فتح نافذة الفاتورة للمعاينة قبل الإرسال مع تطبيق الخصم والترقيم on 001
         function handleOpenConfirmModal(event) {
             event.preventDefault();
             if (cart.length === 0) { 
@@ -803,19 +842,34 @@
                 `;
             });
 
+            // حساب الخصم 3%
+            const discount = Math.round(subtotal * 0.03);
+            const netTotal = Math.max(0, subtotal - discount);
+            const seqInfo = getDailyOrderNumberInfo();
+
             pendingOrderData = {
-                id: 'ORD-' + Date.now().toString().slice(-6),
+                id: `on ${seqInfo.formattedSeq}`,
+                seqNumber: seqInfo.seqNumber,
+                cycleKey: seqInfo.cycleKey,
+                rawDailySeq: seqInfo.formattedSeq,
                 date: new Date().toLocaleString('ar-SY'),
                 customer: { name, phone, address, notes, orderType },
                 items: [...cart],
                 subtotal: subtotal,
-                total: subtotal
+                discount: discount,
+                total: netTotal
             };
 
             const modalReceiptBody = document.getElementById('modal-receipt-body');
             modalReceiptBody.innerHTML = `
-                <div style="font-size:0.8rem; color:#aaa; margin-bottom:8px; display:flex; justify-content:space-between;">
-                    <span>رقم الفاتورة: <strong>${pendingOrderData.id}</strong></span>
+                <div style="font-size:0.85rem; color:#aaa; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="display:flex; align-items:baseline; gap:4px;">
+                        <span>رقم الفاتورة:</span>
+                        <strong style="color:var(--primary-color); font-size:1.15rem; display:inline-flex; align-items:baseline; gap:3px;">
+                            <span style="font-size:0.75rem; text-transform:lowercase; font-weight:bold; color:#888;">on</span>
+                            <span>${seqInfo.formattedSeq}</span>
+                        </strong>
+                    </span>
                     <span>${pendingOrderData.date}</span>
                 </div>
                 <div style="border-bottom:1px solid #333; padding-bottom:6px; margin-bottom:8px;">
@@ -826,9 +880,20 @@
                 <div style="margin-bottom:8px;">
                     ${itemsHtml}
                 </div>
-                <div class="receipt-total-row">
-                    <span>الإجمالي الكلي:</span>
-                    <span>${subtotal.toLocaleString()} ل.س</span>
+                <!-- تفاصيل الحسم والإجمالي في المعاينة -->
+                <div style="border-top:1px dashed #444; padding-top:6px; margin-top:6px; display:flex; flex-direction:column; gap:3px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#aaa;">
+                        <span>المجموع الأصلي:</span>
+                        <span>${subtotal.toLocaleString()} ل.س</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#25d366; font-weight:bold;">
+                        <span>حسم خاص (3%):</span>
+                        <span>- ${discount.toLocaleString()} ل.س</span>
+                    </div>
+                    <div class="receipt-total-row" style="margin-top:2px;">
+                        <span>الصافي بعد الحسم:</span>
+                        <span>${netTotal.toLocaleString()} ل.س</span>
+                    </div>
                 </div>
             `;
 
@@ -839,11 +904,14 @@
             document.getElementById('confirm-modal').style.display = 'none';
         }
 
-        // إرسال الطلب وحفظه عبر دالة Netlify السحابية ثم فتح الواتساب
+        // إرسال الطلب وحفظه عبر الدالة السحابية ثم فتح الواتساب
         async function processFinalOrder() {
             if (!pendingOrderData) return;
 
-            // 1. إرسال الطلب وحفظه عبر الدالة السحابية في Netlify
+            // تثبيت رقم الفاتورة
+            saveDailyOrderNumberCommitted(pendingOrderData.cycleKey, pendingOrderData.seqNumber);
+
+            // 1. حفظ الطلب في الخادم
             try {
                 const response = await fetch('/.netlify/functions/orders', {
                     method: 'POST',
@@ -853,6 +921,8 @@
                         date: pendingOrderData.date,
                         customer: pendingOrderData.customer,
                         items: pendingOrderData.items,
+                        subtotal: pendingOrderData.subtotal,
+                        discount: pendingOrderData.discount,
                         total: pendingOrderData.total
                     })
                 });
@@ -865,7 +935,7 @@
                 console.error('فشل الاتصال بالدالة السحابية:', err);
             }
 
-            // 2. تجميع نص الفاتورة للواتساب مع الترويسة المعتمدة
+            // 2. تجميع نص الفاتورة للواتساب مع الخصم 3% ورقم الفاتورة on 001
             let itemsListText = '';
             pendingOrderData.items.forEach((item, idx) => {
                 const itemSubtotal = item.unitPrice * item.qty;
@@ -896,8 +966,9 @@
 ${generalNotes}---------------------------------
 📝 *تفاصيل الأصناف:*
 ${itemsListText}---------------------------------
-💵 *مجموع المنتجات:* ${pendingOrderData.subtotal.toLocaleString()} ل.س
-${deliveryNoteText}💰 *الإجمالي النهائي:* *${pendingOrderData.total.toLocaleString()} ل.س*
+💵 *المجموع الأصلي:* ${pendingOrderData.subtotal.toLocaleString()} ل.س
+🎁 *حسم خاص (3%):* - ${pendingOrderData.discount.toLocaleString()} ل.س
+${deliveryNoteText}💰 *الصافي بعد الحسم:* *${pendingOrderData.total.toLocaleString()} ل.س*
 ---------------------------------
 شكراً لاختياركم مطعم عالم الفواكه!`;
 
