@@ -9,7 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- مكتبة QZ Tray للطباعة الصامتة -->
+    <!-- مكتبات QZ Tray والتوقيع الرقمي للطباعة الصامتة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.9.0/jsrsasign-all-min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.6/qz-tray.min.js"></script>
 
     <style>
@@ -246,10 +247,78 @@
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // ==== إعداد الأمان لـ QZ Tray (بدون توقيع معطّل لتجنب مشكلة الحظر) ====
+        // ==== إعداد الأمان والتوقيع الرقمي لـ QZ Tray لمنع النوافذ المنبثقة نهائياً ====
         function setupQzSecurity() {
-            qz.security.setCertificatePromise(null);
-            qz.security.setSignaturePromise(null);
+            qz.security.setCertificatePromise(function(resolve, reject) {
+                resolve("-----BEGIN CERTIFICATE-----\n" +
+                    "MIIECzCCAvOgAwIBAgIGAaA/veRqMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJS\n" +
+                    "EWJVUZELMAkGA1UECAwCTlkxEjAQBgNVBAcMCUNhbmFzdG90YTEbMBkGA1UECgwS\n" +
+                    "UVogSW5kdXN0cmllcywgTExDMRswGQYDVQQLDBJRWiBJbmR1c3RyaWVzLCBMTEMx\n" +
+                    "HDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAcXouaW8xGjAYBgNVBAMMEVFaIFRyYXkg\n" +
+                    "RGVtb3BDZXJ0MB4XDTI2MDgyNTIwMjEzOVoXDTQ2MDgyNTIwMjEzOVowgaIxCzAJ\n" +
+                    "BgNVBAYTA1VTMQswCQYDVQQIDAJOWTESMBAGA1UEBwwJQ2FuYXN0b3RhMRswGQYD\n" +
+                    "VQQKDBJRWiBJbmR1c3RyaWVzLCBMTEMxGzAZBgNVBAsMElFaIEluZHVzdHJpZXMs\n" +
+                    "IExMQzEcMBoGCSqGSIb3DQEJARYNc3VwcG9ydEBxei5pbzEaMBgGA1UEAwwRUVog\n" +
+                    "VHJheSBEZW1vIENlcnQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDV\n" +
+                    "LyMbpsKa1C4GDxQ7eBq71Wgx1TvYCTjHEpkooNQ2N4xiYTUV3lojsQvZgHjOq7bA\n" +
+                    "sNG7pV6qgj3DG9kC4sVf3CBOWNlZhoR/RyQp91gXbx68++VfetLji1r4yYDayNGz\n" +
+                    "/Td1DHqRa7q46PSIg1fVmKNX6OXn92FK0BW0t0GUMZrJW61cjSJNblPbsbTwCrvJ\n" +
+                    "6lAfWezdcUx18t5kGSjhO3NQCG07d+FPjjgfN7MnwsSl8U2Y1LMyGv7WAhO+Gnxs\n" +
+                    "Dme216axbT1J8sBmUD1D4XGv10bOni65+w+LJ8zvN9E5v2ThPyuzkJrW3uNHMs3F\n" +
+                    "zJ60y8ZIqf5PpcRmyWe5AgMBAAGjRTBDMBIGA1UdEwEB/wQIMAYBAf8CAQEwDgYD\n" +
+                    "VR0PAQH/BAQDAgEGMB0GA1UdDgQWBBTTXOXckf+in8rarOpOdGxI1Lyu1zANBgkq\n" +
+                    "hkiG9w0BAQsFAAOCAQEAiEvnSf8RP1bBR+tCi6oWvEi0s0MfnCteaquFhg2I8zw6\n" +
+                    "Kn0FDF2CRJjdxm6tmoyYWU45zejm3XIDLR1zHqW8A5R6rY2yLx4HMV6c1dJasDKFq\n" +
+                    "gFEH5BbnxRgpU515T86GCjbXQinPyaSRauEFrDtyFG/dhsayA3veuUnY9vd07NbC\n" +
+                    "xkWIVtd8pW41EhkUkPz5nik4cihu5TgtMsKAZPWVPBQk4MjBej3IShoj116cxHpn\n" +
+                    "lO4clEmZTBAPZpVoD+65TpUfPdUhRQPfo+SNjKDMWTww5g8CNoXTsXPkYU9M554t\n" +
+                    "ZB7PTzwXB0Wnc+mALJ1VeYD0vQpiF37R5wW7B64+SA==\n" +
+                    "-----END CERTIFICATE-----");
+            });
+
+            qz.security.setSignatureAlgorithm("SHA512");
+            qz.security.setSignaturePromise(function(toSign) {
+                return function(resolve, reject) {
+                    try {
+                        const pk = KEYUTIL.getKey("-----BEGIN PRIVATE KEY-----\n" +
+                            "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDVLyMbpsKa1C4G\n" +
+                            "DxQ7eBq71Wgx1TvYCTjHEpkooNQ2N4xiYTUV3lojsQvZgHjOq7bAsNG7pV6qgj3D\n" +
+                            "G9kC4sVf3CBOWNlZhoR/RyQp91gXbx68++VfetLji1r4yYDayNGz/Td1DHqRa7q4\n" +
+                            "6PSIg1fVmKNX6OXn92FK0BW0t0GUMZrJW61cjSJNblPbsbTwCrvJ6lAfWezdcUx1\n" +
+                            "8t5kGSjhO3NQCG07d+FPjjgfN7MnwsSl8U2Y1LMyGv7WAhO+GnxsDme216axbT1J\n" +
+                            "8sBmUD1D4XGv10bOni65+w+LJ8zvN9E5v2ThPyuzkJrW3uNHMs3FzJ60y8ZIqf5P\n" +
+                            "pcRmyWe5AgMBAAECggEAQMhjv1XkQkwwVjgD2nSLjzPxR194oZRf1CMDNVtOuAsW\n" +
+                            "VpkapCwfMURUiOiBDbDnxtmUypsc2WzdrupJ/pYCC7jdemGGny2BGxp3O2aga3Kh\n" +
+                            "oSVdFTBCYNJq0TqOtS2cIdK1PpUNtB5MLj/gg1iSzv5k+OR15RFoV+83AWVFA06p\n" +
+                            "+QgO672zSOWI0iOdxB3G1Q+fDefE+DBhUp38sFLdeL3wC5dx5j8sMTjk4zS1rUQ2\n" +
+                            "RQceIUTG9lwYpa8RnLsERKOCmG07pI4sN8V1VFTL6z54xH6yHe1S8CojTj1IJ3XS\n" +
+                            "jjKmZZAikajtONW9wvByHLBhyv3Rcbrw/GxPaB+qHwKBgQDyipwf48sJ23fJFNOD\n" +
+                            "GbkBK6N35gREEVwWmdSf0RNxNa5NJczOnNS2xojKG05bfDa0U+NQ8mV1Rvw2Gn8/0\n" +
+                            "71OB12mcNXJp/fh0nUySrpOS6tgCFmCSd82SJcLJZ85FL9TDGeATpX0cIjiQTVF8\n" +
+                            "5JZnRH2juTo/7rE2gN2KC/2sAwKBgQDHA37wMxLLXVjdLEB5LjIn1hruzV36Sa2m\n" +
+                            "zNM6M0vSgvmhzPWJLn2foHBBAf1a+Gu+6BDFOZN1PJ6FqdmOscEeRj7hToL8zhE1\n" +
+                            "iN+SYEfzla9VYInyJ3Q12ppE6X3JHsOVm9E/Plz/n+bG5QLfzf/mBklTifttBxtd\n" +
+                            "WZ/ItyU2kwKBgQCZswMLJnTvk1HOiLcc/mEB/+CAq7AKX6VyTg36uuSM314fzNCF\n" +
+                            "7cw/xfSWQg7y3RzRDhqayGmd0hglVwL+1ILwvb3sOtB1oK8hX01WLvFwCgjHEd0z\n" +
+                            "FF6effV5YqiRsCT5W1lotdeZy4ni0EySg91YJcwkw83JE/8TVgiOYdjodwKBgQDb\n" +
+                            "t0gUBTYE4yEW4ORULSUxxQBfvN3Rj6WM4dGW3R8WHxdq/90NuFgD4/NSP4USGMd\n" +
+                            "hQmEj3oXjlVT6Evx9Ex4VwsFI17xcF554k89ZVqcldrhallUj2dC2DYF6L0Ow7bDp\n" +
+                            "07tdHYg36/Gy4U1PNV3dROIw1QwnhqTRoIRPv9ZM1QKBgCbkTSKeHaJrXVQT4PUq\n" +
+                            "xd3isKk54sy8IMwdc7E1ZrZ3PSspbk2hveka+r8b6fUsWDL/KwnD7YKnDz0Yjk9P\n" +
+                            "6a0BcLvEy61TBdJSm/c2R29eAg5Dt0dKaybeoAs+93fnyriJlsqFyd3tE0E2fKWw\n" +
+                            "ke8AX3+c3G5ou2OQWtBs+IVU\n" +
+                            "-----END PRIVATE KEY-----");
+                        const sig = new KJUR.crypto.Signature({ alg: "SHA512withRSA" });
+                        sig.init(pk);
+                        sig.updateString(toSign);
+                        const hex = sig.sign();
+                        resolve(stob64(hextorstr(hex)));
+                    } catch (err) {
+                        console.error("Signature Error:", err);
+                        reject(err);
+                    }
+                };
+            });
         }
 
         async function preloadImageToBase64(url) {
