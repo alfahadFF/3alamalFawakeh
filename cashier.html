@@ -246,43 +246,10 @@
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // ==== شهادة QZ Tray الخاصة (self-signed) ====
-        const QZ_CERTIFICATE = `-----BEGIN CERTIFICATE-----
-MIIDqjCCApKgAwIBAgIUNcfzw1aCkeJyRkTLb5wP7u/x2MQwDQYJKoZIhvcNAQEL
-BQAwVDEaMBgGA1UEAwwRYWxmYWhkLXJlc3RhdXJhbnQxCzAJBgNVBAYTAlVTMREw
-DwYDVQQIDAhOZXcgWW9yazEWMBQGA1UEBwwNTmV3IFlvcmsgQ2l0eTAeFw0yNjA4
-MjMwMDQwMzJaFw0yNzA4MjMwMDQwMzJaMFQxGjAYBgNVBAMMEWFsZmFoZC1yZXN0
-YXVyYW50MQswCQYDVQQGEwJVUzERMA8GA1UECAwITmV3IFlvcmsxFjAUBgNVBAcM
-DU5ldyBZb3JrIENpdHkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC3
-jVDbH2+NCArZbMXbngtwbhLpWnIX64ZE3Wl6vrjeYWzJTSysqzdA8VsyIbzTtdNi
-DCjt+73SmEomBc1loYnerFuX4er3sTv+sgm2MxXxEHWZp832zHlN8hpS+ewsKJhb
-WAJxcEFQgYiEQ1t/sAgooan+ib448Cyx9n5sFZNKg5cpc8l0xwGlMNGC4qSQh9IU
-RmE1sGzl+NJ6TyXyywDxjasQlCEqIq6JPcw2azPd5ukPyHejiN7xXHQNBld5VisS
-/GopOLRhv/d2vVM64mW8AHyFH+mPtCvew9EC+six/fqva6RThBqYGT8HIsmwA9ZR
-ymkc6+Rj2+JQJGVuWdrNAgMBAAGjdDByMB0GA1UdDgQWBBQ5YlZGtMSYYOey0tkv
-5tEQvnCubzAfBgNVHSMEGDAWgBQ5YlZGtMSYYOey0tkv5tEQvnCubzAOBgNVHQ8B
-Af8EBAMCBaAwIAYDVR0lAQH/BBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqG
-SIb3DQEBCwUAA4IBAQAiDGCjl0hzXlEy+3gAv6HT/2r6aaaQKKWztoXz2L+VWEK9
-6WgLvBhq0UKaEDLPDpgxd7+p/X2dfSp6Z5Wxqu0UZnTArrdQopsQzHkJtmcDQR1d
-YWAIWA4DxrgaEjN5h4uSxl24uXctylk9ViqR3mrnMZIR6d0lq3gtNM4hnD25X3Wx
-Xi83p8W87r4lNtJM4I59K1T1AfmaiWd5UmgueuzYyMMO+SbIijZ9eqEmMkyCp0lv
-Q2nGc0DDaB9KQxtWuTiUpvR685iURADH8A3+AjY7AVrch9rnooxHR//8SOQX8rmn
-nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
------END CERTIFICATE-----`;
-
+        // ==== إعداد الأمان لـ QZ Tray (بدون توقيع معطّل لتجنب مشكلة الحظر) ====
         function setupQzSecurity() {
-            qz.security.setCertificatePromise(function(resolve) {
-                resolve(QZ_CERTIFICATE);
-            });
-
-            qz.security.setSignaturePromise(function(toSign) {
-                return function(resolve, reject) {
-                    fetch("/.netlify/functions/qz-sign?request=" + encodeURIComponent(toSign))
-                        .then(res => res.text())
-                        .then(resolve)
-                        .catch(reject);
-                };
-            });
+            qz.security.setCertificatePromise(null);
+            qz.security.setSignaturePromise(null);
         }
 
         async function preloadImageToBase64(url) {
@@ -369,7 +336,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
 
             orders.forEach(ord => {
                 const dateObj = parseOrderDate(ord);
-                // إزاحة الوقت 8 ساعات للوراء: تصبح الفترة من 8:00 صباحاً اليوم حتى 7:59 صباح الغد تتبع نفس التاريخ
                 const shiftTime = dateObj.getTime() - (8 * 60 * 60 * 1000);
                 const shiftDate = new Date(shiftTime);
                 const cycleKey = `${shiftDate.getFullYear()}-${shiftDate.getMonth() + 1}-${shiftDate.getDate()}`;
@@ -379,7 +345,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
             });
 
             Object.keys(groups).forEach(key => {
-                // الفرز تصاعدياً بحسب وقت الطلب
                 groups[key].sort((a, b) => a.time - b.time);
                 groups[key].forEach((item, idx) => {
                     item.ord.dailySeq = String(idx + 1).padStart(3, '0');
@@ -398,7 +363,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
             }
             const originalSubtotal = itemsSum > 0 ? itemsSum : Number(ord.subtotal || ord.total || 0);
             
-            // خصم 3% تلقائي
             const discount = Math.round(originalSubtotal * 0.03);
             const netTotal = Math.max(0, originalSubtotal - discount);
 
@@ -454,7 +418,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         <div style="font-size:11px; margin-top:2px; font-weight:bold; background:#eee; padding:1px; border-radius:3px;">نوع الطلب: ${ord.customer?.orderType || 'خارجي'}</div>
                     </div>
 
-                    <!-- صندوق رقم الفاتورة بتصميم on صغير وبداية من 001 يومياً -->
                     <div style="border:2px solid #000; border-radius:6px; padding:4px 2px; margin:5px 0; text-align:center; background:#fafafa;">
                         <div style="font-size:11px; font-weight:bold; color:#222;">رقم الفاتورة</div>
                         <div style="font-size:22px; font-weight:900; letter-spacing:1px; line-height:1.1; margin-top:1px; display:flex; align-items:baseline; justify-content:center; gap:5px;">
@@ -468,7 +431,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         <span style="direction:ltr;">${ord.date || ''}</span>
                     </div>
 
-                    <!-- تفاصيل الزبون والعنوان -->
                     ${(ord.customer?.name || ord.customer?.phone || ord.customer?.address || ord.customer?.notes) ? `
                     <div style="border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:4px; font-size:12px; line-height:1.45;">
                         ${ord.customer?.name ? `
@@ -507,7 +469,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                         </tbody>
                     </table>
 
-                    <!-- جدول الإجماليات مع الخصم الآلي 3% -->
                     <table style="width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4px; font-size:11px; font-weight:bold;">
                         <tr>
                             <td style="border:1px solid #000; padding:2px 4px; width:50%; text-align:right;">المجموع الأصلي</td>
@@ -699,7 +660,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
                 const fetchedOrders = await response.json();
                 if (!Array.isArray(fetchedOrders)) return;
 
-                // احتساب تسلسل الفواتير اليومي اعتباراً من 8 صباحاً
                 computeDailySequences(fetchedOrders);
 
                 if (!isFirstLoad) {
@@ -801,7 +761,6 @@ nr128U1LG5NQ9UDWt9/k57Dp0ylESmAluliIHePS
 
                         <div class="items-list">${itemsList}</div>
 
-                        <!-- صندوق عرض الإجماليات والخصم الآلي 3% -->
                         <div class="order-total-box">
                             <div class="total-line">
                                 <span>المجموع الأصلي:</span>
