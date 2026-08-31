@@ -973,7 +973,8 @@ ${deliveryNoteText}💰 *الصافي بعد الحسم:* *${pendingOrderData.to
 شكراً لاختياركم مطعم عالم الفواكه!`;
 
             // 3. فتح الواتساب
-            window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
+            window.open(`whatsapp://send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
+
 
             // 4. تفريغ السلة وإغلاق النافذة
             document.getElementById('confirm-modal').style.display = 'none';
