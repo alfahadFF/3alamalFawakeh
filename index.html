@@ -441,10 +441,13 @@
         const WHATSAPP_PHONE = '963957984951';
         const MANAGER_PHONE = '0938174782';
 
+        // بيانات الربط مع Supabase
+        const SUPABASE_URL = "https://xqsbyosxzfqqzzgwppyk.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxc2J5b3N4emZxcXp6Z3dwcHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNzc3OTgsImV4cCI6MjEwMjc1Mzc5OH0.mlsG5y0W2ZVVL0TxviMr0dCXJBh0KDz1W8tIZMcdQXk";
+
         // دالة توليد رقم الفاتورة التسلسلي اليومي بدءاً من الساعة 8:00 صباحاً برقم 001
         function getDailyOrderNumberInfo() {
             const now = new Date();
-            // إزاحة 8 ساعات للوراء لتكون الدورة اليومية من 8 ص اليوم حتى 7:59 ص الغد
             const shiftTime = new Date(now.getTime() - (8 * 60 * 60 * 1000));
             const cycleKey = `${shiftTime.getFullYear()}-${shiftTime.getMonth() + 1}-${shiftTime.getDate()}`;
 
@@ -479,73 +482,58 @@
             handleOrderTypeChange();
         });
 
+        // 1. جلب المنيو مباشرة عبر Supabase REST API
         async function fetchLiveMenu() {
             try {
-                const response = await fetch('/.netlify/functions/get-menu');
-                if (!response.ok) throw new Error('Network response failed');
-                const csvText = await response.text();
-                productsData = parseCSVData(csvText);
+                const response = await fetch(SUPABASE_URL + '/rest/v1/items?select=*&is_available=eq.true', {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    }
+                });
 
+                if (!response.ok) throw new Error('Network response failed');
+                
+                const rawItems = await response.json();
+                const productsMap = {};
+                
+                rawItems.forEach((item, idx) => {
+                    const name = item.name;
+                    if (!name) return;
+                    
+                    const category = item.category_name || item.category || 'عام';
+                    const variant = item.variant_clean || item.variant || 'عادي';
+                    const price = Number(item.price) || 0;
+                    const isAvailable = item.is_available !== false;
+                    
+                    if (!productsMap[name]) {
+                        productsMap[name] = {
+                            id: item.id || `item_${idx}`,
+                            name: name,
+                            category: category,
+                            desc: item.family || item.description || '',
+                            image: item.image_url || '/logo.png', 
+                            variants: []
+                        };
+                    }
+                    
+                    productsMap[name].variants.push({
+                        size: variant,
+                        price: price,
+                        isAvailable: isAvailable
+                    });
+                });
+
+                productsData = Object.values(productsMap);
                 document.getElementById('loader-box').style.display = 'none';
                 buildCategoriesNav();
                 renderProducts(currentCategory);
+
             } catch (error) {
+                console.error("Fetch Error:", error);
                 document.getElementById('loader-box').innerHTML = `
-                    <div style="color: var(--primary-color);">
-                        ⚠️ فشل تحميل بيانات المنيو المباشرة.
-                    </div>`;
+                    <div style="color: var(--primary-color);">⚠️ فشل تحميل بيانات المنيو المباشرة.</div>`;
             }
-        }
-
-        function parseCSVData(csvText) {
-            const lines = csvText.split('\n').filter(l => l.trim() !== '');
-            if (lines.length < 2) return [];
-
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-
-            const getValue = (rowObj, keyFragment) => {
-                for (let k in rowObj) {
-                    if (k.toLowerCase().includes(keyFragment.toLowerCase())) return rowObj[k];
-                }
-                return '';
-            };
-
-            const rawRows = lines.slice(1).map(line => {
-                const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, ''));
-                let obj = {};
-                headers.forEach((h, idx) => { obj[h] = values[idx] || ''; });
-                return obj;
-            });
-
-            const productsMap = {};
-
-            rawRows.forEach((row, idx) => {
-                const name = getValue(row, 'item_name');
-                if (!name || name.trim() === '') return;
-
-                const id = getValue(row, 'item_id') || `item_${idx}`;
-                const category = getValue(row, 'category') || 'عام';
-                const variant = getValue(row, 'variant') || 'عادي';
-                const rawPrice = getValue(row, 'price');
-                const price = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
-                const desc = getValue(row, 'description') || '';
-                const rawStatus = getValue(row, 'status') || 'متوفر';
-                const image = getValue(row, 'image_url') || '/logo.png';
-
-                const isAvailable = !rawStatus.includes('غير') && !rawStatus.includes('نفذ') && !rawStatus.includes('لا');
-                const groupKey = `${category}_${name}`.trim();
-
-                if (!productsMap[groupKey]) {
-                    productsMap[groupKey] = {
-                        id: id, category: category, name: name, desc: desc, image: image,
-                        variants: []
-                    };
-                }
-
-                productsMap[groupKey].variants.push({ size: variant || 'عادي', price: price, isAvailable: isAvailable });
-            });
-
-            return Object.values(productsMap);
         }
 
         function buildCategoriesNav() {
@@ -810,7 +798,6 @@
         function removeCartItem(index) { cart.splice(index, 1); renderCart(); }
         function scrollToCart() { document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' }); }
 
-        // فتح نافذة الفاتورة للمعاينة قبل الإرسال مع تطبيق الخصم والترقيم on 001
         function handleOpenConfirmModal(event) {
             event.preventDefault();
             if (cart.length === 0) { 
@@ -880,7 +867,6 @@
                 <div style="margin-bottom:8px;">
                     ${itemsHtml}
                 </div>
-                <!-- تفاصيل الحسم والإجمالي في المعاينة -->
                 <div style="border-top:1px dashed #444; padding-top:6px; margin-top:6px; display:flex; flex-direction:column; gap:3px;">
                     <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#aaa;">
                         <span>المجموع الأصلي:</span>
@@ -904,38 +890,58 @@
             document.getElementById('confirm-modal').style.display = 'none';
         }
 
-        // إرسال الطلب وحفظه عبر الدالة السحابية ثم فتح الواتساب
+        // 2. إرسال الطلب مباشرة إلى Supabase ثم التحويل للواتساب
         async function processFinalOrder() {
             if (!pendingOrderData) return;
 
             // تثبيت رقم الفاتورة
             saveDailyOrderNumberCommitted(pendingOrderData.cycleKey, pendingOrderData.seqNumber);
 
-            // 1. حفظ الطلب في الخادم
+            // 1. حفظ الطلب في Supabase
             try {
-                const response = await fetch('/.netlify/functions/orders', {
+                const sbOrderData = {
+                    id: pendingOrderData.id,
+                    date: new Date().toISOString().slice(0, 10),
+                    customer: pendingOrderData.customer,
+                    items: pendingOrderData.items.map(it => ({
+                        name: it.name,
+                        qty: it.qty,
+                        price: it.unitPrice,
+                        total: it.unitPrice * it.qty,
+                        notes: it.note || ""
+                    })),
+                    subtotal: pendingOrderData.subtotal,
+                    discount: pendingOrderData.discount,
+                    total: pendingOrderData.total,
+                    delivery_fee: 0,
+                    payment: "cash",
+                    status: "new",
+                    source: "online",
+                    no: pendingOrderData.rawDailySeq
+                };
+
+                const response = await fetch(SUPABASE_URL + '/rest/v1/online_orders', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: pendingOrderData.id,
-                        date: pendingOrderData.date,
-                        customer: pendingOrderData.customer,
-                        items: pendingOrderData.items,
-                        subtotal: pendingOrderData.subtotal,
-                        discount: pendingOrderData.discount,
-                        total: pendingOrderData.total
-                    })
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(sbOrderData)
                 });
 
-                const result = await response.json();
-                if (response.status !== 200) {
-                    console.error("خطأ في الخادم أثناء حفظ الطلب:", result);
+                if (!response.ok) {
+                    const result = await response.text();
+                    console.error("خطأ في الخادم أثناء حفظ الطلب في سوبابيس:", result);
+                } else {
+                    console.log("تم الإرسال بنجاح إلى سوبابيس!");
                 }
             } catch (err) {
-                console.error('فشل الاتصال بالدالة السحابية:', err);
+                console.error('فشل الاتصال بسوبابيس:', err);
             }
 
-            // 2. تجميع نص الفاتورة للواتساب مع الخصم 3% ورقم الفاتورة on 001
+            // 2. تجميع نص الفاتورة للواتساب
             let itemsListText = '';
             pendingOrderData.items.forEach((item, idx) => {
                 const itemSubtotal = item.unitPrice * item.qty;
@@ -974,7 +980,6 @@ ${deliveryNoteText}💰 *الصافي بعد الحسم:* *${pendingOrderData.to
 
             // 3. فتح الواتساب
             window.open(`whatsapp://send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
-
 
             // 4. تفريغ السلة وإغلاق النافذة
             document.getElementById('confirm-modal').style.display = 'none';
