@@ -236,6 +236,10 @@
         const PRINTER_CASHIER = "RONGTA 80mm 2";
         const PRINTER_KITCHEN = "RONGTA 80mm Series Printer";
 
+        // إعدادات Supabase
+        const SUPABASE_URL = "https://xqsbyosxzfqqzzgwppyk.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxc2J5b3N4emZxcXp6Z3dwcHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNzc3OTgsImV4cCI6MjEwMjc1Mzc5OH0.mlsG5y0W2ZVVL0TxviMr0dCXJBh0KDz1W8tIZMcdQXk";
+
         let liveOrders = [];
         let knownOrderIds = new Set();
         let isFirstLoad = true;
@@ -247,7 +251,7 @@
         let cachedLogoBase64 = '';
         let cachedQrBase64 = '';
 
-        // ==== إعداد الأمان والتوقيع الرقمي لـ QZ Tray لمنع النوافذ المنبثقة نهائياً ====
+        // إعداد الأمان والتوقيع الرقمي لـ QZ Tray
         function setupQzSecurity() {
             qz.security.setCertificatePromise(function(resolve, reject) {
                 resolve("-----BEGIN CERTIFICATE-----\n" +
@@ -362,7 +366,6 @@
             }
         }
 
-        // تحويل وتفسير التواريخ
         function parseOrderDate(order) {
             if (!order || !order.date) return new Date();
             try {
@@ -375,7 +378,10 @@
                 dateStr = dateStr.replace(/[صمAPMapm]/g, '').trim();
 
                 const parts = dateStr.split(/[\s,]+/);
-                if (parts.length < 2) return new Date();
+                if (parts.length < 2) {
+                    const singleDate = new Date(dateStr);
+                    return isNaN(singleDate.getTime()) ? new Date() : singleDate;
+                }
 
                 const dateParts = parts[0].split(/[\/\-\.]/).map(p => parseInt(p, 10));
                 const timeParts = parts[1].split(':').map(p => parseInt(p, 10));
@@ -398,7 +404,6 @@
             }
         }
 
-        // حساب ترقيم الفاتورة اليومي الذي يبدأ الساعة 8 صباحاً برقم 001
         function computeDailySequences(orders) {
             if (!Array.isArray(orders)) return;
             const groups = {};
@@ -416,7 +421,7 @@
             Object.keys(groups).forEach(key => {
                 groups[key].sort((a, b) => a.time - b.time);
                 groups[key].forEach((item, idx) => {
-                    item.ord.dailySeq = String(idx + 1).padStart(3, '0');
+                    item.ord.dailySeq = item.ord.no || String(idx + 1).padStart(3, '0');
                 });
             });
         }
@@ -425,15 +430,14 @@
             let itemsSum = 0;
             if (Array.isArray(ord.items) && ord.items.length > 0) {
                 ord.items.forEach(it => {
-                    const price = Number(it.unitPrice || 0);
+                    const price = Number(it.unitPrice || it.price || 0);
                     const qty = Number(it.qty || 1);
                     itemsSum += (price * qty);
                 });
             }
             const originalSubtotal = itemsSum > 0 ? itemsSum : Number(ord.subtotal || ord.total || 0);
-            
-            const discount = Math.round(originalSubtotal * 0.03);
-            const netTotal = Math.max(0, originalSubtotal - discount);
+            const discount = ord.discount !== undefined ? Number(ord.discount) : Math.round(originalSubtotal * 0.03);
+            const netTotal = ord.total !== undefined ? Number(ord.total) : Math.max(0, originalSubtotal - discount);
 
             return { originalSubtotal, discount, netTotal };
         }
@@ -443,10 +447,10 @@
             
             if (Array.isArray(ord.items) && ord.items.length > 0) {
                 ord.items.forEach(it => {
-                    const price = Number(it.unitPrice || 0);
+                    const price = Number(it.unitPrice || it.price || 0);
                     const qty = Number(it.qty || 1);
-                    const total = price * qty;
-                    const note = it.note || '';
+                    const total = it.total || (price * qty);
+                    const note = it.note || it.notes || '';
 
                     itemsRows += `
                         <tr>
@@ -471,7 +475,7 @@
             }
 
             const financials = calculateOrderFinancials(ord);
-            const dailyNum = ord.dailySeq || '001';
+            const dailyNum = ord.dailySeq || ord.no || '001';
 
             const logoSrc = cachedLogoBase64 || `${window.location.origin}/Black-logo.png`;
             const qrSrc = cachedQrBase64 || `${window.location.origin}/qr-code.png`;
@@ -702,38 +706,37 @@
                 container.innerHTML = `
                     <div class="state-box">
                         <i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary-color);"></i>
-                        <div style="margin-top:10px;">جاري جلب الطلبات من السيرفر...</div>
+                        <div style="margin-top:10px;">جاري جلب الطلبات من سوبابيس...</div>
                     </div>`;
             }
 
             try {
-                const response = await fetch('/.netlify/functions/orders', {
+                // جلب الطلبات مباشرة من جدول online_orders في Supabase
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/online_orders?select=*&order=created_at.desc`, {
                     method: 'GET',
-                    headers: { 'x-cashier-pin': pin }
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                if (response.status === 401) {
-                    localStorage.removeItem('cashier_pin');
-                    if (!isBackground) {
-                        container.innerHTML = `
-                            <div class="state-box">
-                                <i class="fa-solid fa-triangle-exclamation fa-3x" style="color:var(--primary-color); margin-bottom:10px;"></i>
-                                <div>رمز PIN غير صحيح. تعذر فتح السجل.</div>
-                                <button class="btn btn-auth" style="margin-top:15px;" onclick="resetPin()">إعادة المحاولة</button>
-                            </div>`;
-                    }
-                    return;
-                }
-
-                if (!response.ok) throw new Error('Network error');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const fetchedOrders = await response.json();
                 if (!Array.isArray(fetchedOrders)) return;
 
-                computeDailySequences(fetchedOrders);
+                // توحيد الحقول القادمة من قاعدة البيانات
+                const normalizedOrders = fetchedOrders.map(ord => ({
+                    ...ord,
+                    dailySeq: ord.no || ord.dailySeq,
+                    date: ord.date || (ord.created_at ? new Date(ord.created_at).toLocaleString('ar-SY') : '')
+                }));
+
+                computeDailySequences(normalizedOrders);
 
                 if (!isFirstLoad) {
                     let latestNewOrder = null;
-                    fetchedOrders.forEach(ord => {
+                    normalizedOrders.forEach(ord => {
                         if (ord.id && !knownOrderIds.has(ord.id) && !isOrderOlderThan3Hours(ord)) {
                             latestNewOrder = ord;
                         }
@@ -746,9 +749,9 @@
                 }
 
                 knownOrderIds.clear();
-                fetchedOrders.forEach(ord => { if (ord.id) knownOrderIds.add(ord.id); });
+                normalizedOrders.forEach(ord => { if (ord.id) knownOrderIds.add(ord.id); });
                 isFirstLoad = false;
-                liveOrders = fetchedOrders;
+                liveOrders = normalizedOrders;
 
                 updateTabCounts();
                 renderOrdersList();
@@ -794,16 +797,16 @@
                 const isArchived = isOrderOlderThan3Hours(ord);
                 const originalIndex = liveOrders.findIndex(o => o.id === ord.id);
                 const financials = calculateOrderFinancials(ord);
-                const dailyNum = ord.dailySeq || '001';
+                const dailyNum = ord.dailySeq || ord.no || '001';
 
                 const itemsList = Array.isArray(ord.items) && ord.items.length > 0
                     ? ord.items.map(it => `
                         <div class="item-row">
                             <div>
                                 <strong>${it.name || 'صنف'}</strong> (${it.size || 'عادي'}) × ${it.qty || 1}
-                                ${it.note ? `<br><span class="item-note-badge">👈 ${it.note}</span>` : ''}
+                                ${(it.note || it.notes) ? `<br><span class="item-note-badge">👈 ${it.note || it.notes}</span>` : ''}
                             </div>
-                            <div><strong>${((it.unitPrice || 0) * (it.qty || 1)).toLocaleString()} ل.س</strong></div>
+                            <div><strong>${((it.unitPrice || it.price || 0) * (it.qty || 1)).toLocaleString()} ل.س</strong></div>
                         </div>
                     `).join('')
                     : `<div style="color:var(--text-muted); font-size:0.85rem;">${ord.itemsText || 'تفاصيل الأصناف مسجلة'}</div>`;
