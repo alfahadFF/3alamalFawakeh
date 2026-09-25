@@ -890,55 +890,83 @@
             document.getElementById('confirm-modal').style.display = 'none';
         }
 
+        /* مفتاح الدورة بصيغة مختصرة: 2026-9-25 ← 20260925 */
+        function compactCycle(cycleKey) {
+            const p = String(cycleKey || '').split('-');
+            if (p.length < 3) return String(Date.now()).slice(0, 8);
+            return p[0] + String(p[1]).padStart(2, '0') + String(p[2]).padStart(2, '0');
+        }
+
+        /* يحفظ الطلب ويرجّع { ok, seq, seqStr, id, error }
+           إن كان الرقم محجوزاً مسبقاً (409) يجرّب الرقم التالي تلقائياً. */
+        async function saveOrderToSupabase(baseRow, cycleKey, startSeq) {
+            let seq = Number(startSeq) || 1;
+            for (let attempt = 0; attempt < 50; attempt++) {
+                const seqStr = String(seq).padStart(3, '0');
+                const row = Object.assign({}, baseRow, { id: 'on ' + seqStr, no: seqStr });
+                let res;
+                try {
+                    res = await fetch(SUPABASE_URL + '/rest/v1/online_orders', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(row)
+                    });
+                } catch (err) {
+                    return { ok: false, seq: seq, seqStr: seqStr, id: row.id, error: 'انقطاع الاتصال: ' + err.message };
+                }
+                if (res.ok) return { ok: true, seq: seq, seqStr: seqStr, id: row.id };
+                const txt = await res.text();
+                if (res.status === 409) { seq++; continue; }   /* الرقم محجوز — جرّب التالي */
+                return { ok: false, seq: seq, seqStr: seqStr, id: row.id, error: res.status + ' ' + txt.slice(0, 200) };
+            }
+            return { ok: false, seq: seq, seqStr: String(seq).padStart(3, '0'), id: null, error: 'لم أجد رقماً حراً' };
+        }
+
         // 2. إرسال الطلب مباشرة إلى Supabase ثم التحويل للواتساب
         async function processFinalOrder() {
             if (!pendingOrderData) return;
 
-            // تثبيت رقم الفاتورة
-            saveDailyOrderNumberCommitted(pendingOrderData.cycleKey, pendingOrderData.seqNumber);
+            // 1. حفظ الطلب في Supabase — برقم فريد لا يتكرر أبداً
+            /* ══════════════════════════════════════════════════════════
+               الرقم يبقى كما هو: «on 001» — بلا تاريخ وبلا أصفار زائدة.
+               ومفتاح الجدول صار مركّباً (الرقم + التاريخ)، فيُقبل الطلب
+               في كل يوم بالرقم نفسه. وإن رُفض الرقم لسبب آخر (تكرار في
+               اليوم نفسه)، نجرّب الرقم التالي تلقائياً بدل أن يضيع.
+               ══════════════════════════════════════════════════════════ */
+            const sbRow = {
+                date: new Date().toISOString().slice(0, 10),
+                customer: pendingOrderData.customer,
+                items: pendingOrderData.items.map(it => ({
+                    name: it.name,
+                    qty: it.qty,
+                    price: it.unitPrice,
+                    total: it.unitPrice * it.qty,
+                    notes: it.note || "",
+                    note: it.note || ""
+                })),
+                subtotal: pendingOrderData.subtotal,
+                discount: pendingOrderData.discount,
+                total: pendingOrderData.total,
+                delivery_fee: 0,
+                payment: "cash",
+                status: "new",
+                source: "online"
+            };
 
-            // 1. حفظ الطلب في Supabase
-            try {
-                const sbOrderData = {
-                    id: pendingOrderData.id,
-                    date: new Date().toISOString().slice(0, 10),
-                    customer: pendingOrderData.customer,
-                    items: pendingOrderData.items.map(it => ({
-                        name: it.name,
-                        qty: it.qty,
-                        price: it.unitPrice,
-                        total: it.unitPrice * it.qty,
-                        notes: it.note || ""
-                    })),
-                    subtotal: pendingOrderData.subtotal,
-                    discount: pendingOrderData.discount,
-                    total: pendingOrderData.total,
-                    delivery_fee: 0,
-                    payment: "cash",
-                    status: "new",
-                    source: "online",
-                    no: pendingOrderData.rawDailySeq
-                };
-
-                const response = await fetch(SUPABASE_URL + '/rest/v1/online_orders', {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(sbOrderData)
-                });
-
-                if (!response.ok) {
-                    const result = await response.text();
-                    console.error("خطأ في الخادم أثناء حفظ الطلب في سوبابيس:", result);
-                } else {
-                    console.log("تم الإرسال بنجاح إلى سوبابيس!");
-                }
-            } catch (err) {
-                console.error('فشل الاتصال بسوبابيس:', err);
+            const saved = await saveOrderToSupabase(sbRow, pendingOrderData.cycleKey, pendingOrderData.seqNumber);
+            if (saved.ok) {
+                pendingOrderData.rawDailySeq = saved.seqStr;
+                pendingOrderData.id = 'on ' + saved.seqStr;
+                saveDailyOrderNumberCommitted(pendingOrderData.cycleKey, saved.seq);
+                console.log("تم الإرسال بنجاح إلى سوبابيس! رقم الطلب: " + saved.id);
+            } else {
+                console.error("لم يُحفظ الطلب في قاعدة البيانات:", saved.error);
+                pendingOrderData.id = 'on ' + String(pendingOrderData.seqNumber).padStart(3, '0');
             }
 
             // 2. تجميع نص الفاتورة للواتساب
@@ -963,7 +991,7 @@
 👑 *بإدارة:* قسيم الحريري
 📞 *هاتف الإدارة:* ${MANAGER_PHONE}
 ---------------------------------
-🔢 *رقم الفاتورة:* ${pendingOrderData.id}
+🔢 *رقم الفاتورة:* ${pendingOrderData.rawDailySeq}
 📅 *التاريخ:* ${pendingOrderData.date}
 👤 *اسم الزبون:* ${pendingOrderData.customer.name}
 📞 *رقم الهاتف:* ${pendingOrderData.customer.phone}
@@ -1009,5 +1037,5 @@ ${deliveryNoteText}💰 *الصافي بعد الحسم:* *${pendingOrderData.to
             }
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a40cff66181365dc',t:'MTc5MDM3MDQzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
